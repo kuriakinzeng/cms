@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  h1 Project Kurize
+  p.lead A minimal template for web development
+  hr
+  .row
+    .col-sm-6
+      h2 Welcome
+      p This theme uses Bootstrap 3. Feel free to modify any part of these text.
+      p
+        a.btn.btn-default(href='#', role='button') Yes sir!
+    .col-sm-6
+      h2 You can choose an existing theme (Not working yet):
+      form(method='POST', action='/settings')
+        input(type='hidden', name='_csrf', value=_csrf)
+        .form-radio
+          .radio
+            label
+              input(type="radio", name="theme", value="default", checked)
+              | Default
+          .radio
+            label
+              input(type="radio", name="theme", value="flatly")
+              | Flat
+        .button-container
+          button.button(type="submit").btn.btn-primary Change

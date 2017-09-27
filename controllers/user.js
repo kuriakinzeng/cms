@@ -1,294 +1,200 @@
-var async = require('async');
-var crypto = require('crypto');
-var nodemailer = require('nodemailer');
-var passport = require('passport');
-var User = require('../models/User');
+const bluebird = require('bluebird');
+const crypto = bluebird.promisifyAll(require('crypto'));
+const nodemailer = require('nodemailer');
+const passport = require('passport');
+const User = require('../models/User');
 
-/**
- * Login required middleware
- */
-exports.ensureAuthenticated = function(req, res, next) {
-  if (req.isAuthenticated()) {
-    next();
-  } else {
-    res.redirect('/login');
-  }
-};
-
-/**
- * GET /login
- */
-exports.loginGet = function(req, res) {
+// GET - Show login page
+exports.getLogin = (req, res) => {
   if (req.user) {
     return res.redirect('/');
   }
   res.render('account/login', {
-    title: 'Log in'
+    title: 'Login'
   });
 };
 
-/**
- * POST /login
- */
-exports.loginPost = function(req, res, next) {
+// POST - Login action with email and password
+exports.postLogin = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
   req.assert('password', 'Password cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
+    req.flash('errors', errors);
     return res.redirect('/login');
   }
 
-  passport.authenticate('local', function(err, user, info) {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) { return next(err); }
     if (!user) {
-      req.flash('error', info);
-      return res.redirect('/login')
+      req.flash('errors', info);
+      return res.redirect('/login');
     }
-    req.logIn(user, function(err) {
-      res.redirect('/');
+    req.logIn(user, (err) => {
+      if (err) { return next(err); }
+      req.flash('success', { msg: 'Success! You are logged in.' });
+      res.redirect(req.session.returnTo || '/');
     });
   })(req, res, next);
 };
 
-/**
- * GET /logout
- */
-exports.logout = function(req, res) {
+// Logout action
+exports.logout = (req, res) => {
   req.logout();
   res.redirect('/');
 };
 
-/**
- * GET /signup
- */
-exports.signupGet = function(req, res) {
+// Sign up page
+exports.getSignup = (req, res) => {
   if (req.user) {
     return res.redirect('/');
   }
   res.render('account/signup', {
-    title: 'Sign up'
+    title: 'Create Account'
   });
 };
 
-/**
- * POST /signup
- */
-exports.signupPost = function(req, res, next) {
-  req.assert('name', 'Name cannot be blank').notEmpty();
+// Sign up action
+exports.postSignup = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
+  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
+    req.flash('errors', errors);
     return res.redirect('/signup');
   }
 
-  User.findOne({ email: req.body.email }, function(err, user) {
-    if (user) {
-      req.flash('error', { msg: 'The email address you have entered is already associated with another account.' });
+  const user = new User({
+    email: req.body.email,
+    password: req.body.password
+  });
+
+  User.findOne({ email: req.body.email }, (err, existingUser) => {
+    if (err) { return next(err); }
+    if (existingUser) {
+      req.flash('errors', { msg: 'Account with that email address already exists.' });
       return res.redirect('/signup');
     }
-    user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password
-    });
-    user.save(function(err) {
-      req.logIn(user, function(err) {
+    user.save((err) => {
+      if (err) { return next(err); }
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
         res.redirect('/');
       });
     });
   });
 };
 
-/**
- * GET /account
- */
-exports.accountGet = function(req, res) {
+// Show profile
+exports.getAccount = (req, res) => {
   res.render('account/profile', {
-    title: 'My Account'
+    title: 'User Profile'
   });
 };
 
-/**
- * PUT /account
- * Update profile information OR change password.
- */
-exports.accountPut = function(req, res, next) {
-  if ('password' in req.body) {
-    req.assert('password', 'Password must be at least 4 characters long').len(4);
-    req.assert('confirm', 'Passwords must match').equals(req.body.password);
-  } else {
-    req.assert('email', 'Email is not valid').isEmail();
-    req.assert('email', 'Email cannot be blank').notEmpty();
-    req.sanitize('email').normalizeEmail({ remove_dots: false });
-  }
+// Update profile
+exports.postUpdateProfile = (req, res, next) => {
+  req.assert('email', 'Please enter a valid email address.').isEmail();
+  req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
+    req.flash('errors', errors);
     return res.redirect('/account');
   }
 
-  User.findById(req.user.id, function(err, user) {
-    if ('password' in req.body) {
-      user.password = req.body.password;
-    } else {
-      user.email = req.body.email;
-      user.name = req.body.name;
-      user.gender = req.body.gender;
-      user.location = req.body.location;
-      user.website = req.body.website;
-    }
-    user.save(function(err) {
-      if ('password' in req.body) {
-        req.flash('success', { msg: 'Your password has been changed.' });
-      } else if (err && err.code === 11000) {
-        req.flash('error', { msg: 'The email address you have entered is already associated with another account.' });
-      } else {
-        req.flash('success', { msg: 'Your profile information has been updated.' });
+  User.findById(req.user.id, (err, user) => {
+    if (err) { return next(err); }
+    user.email = req.body.email || '';
+    user.profile.name = req.body.name || '';
+    user.profile.gender = req.body.gender || '';
+    user.profile.location = req.body.location || '';
+    user.profile.website = req.body.website || '';
+    user.save((err) => {
+      if (err) {
+        if (err.code === 11000) {
+          req.flash('errors', { msg: 'The email address you have entered is already associated with an account.' });
+          return res.redirect('/account');
+        }
+        return next(err);
       }
+      req.flash('success', { msg: 'Profile information has been updated.' });
       res.redirect('/account');
     });
   });
 };
 
-/**
- * DELETE /account
- */
-exports.accountDelete = function(req, res, next) {
-  User.remove({ _id: req.user.id }, function(err) {
+// Update password
+exports.postUpdatePassword = (req, res, next) => {
+  req.assert('password', 'Password must be at least 4 characters long').len(4);
+  req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect('/account');
+  }
+
+  User.findById(req.user.id, (err, user) => {
+    if (err) { return next(err); }
+    user.password = req.body.password;
+    user.save((err) => {
+      if (err) { return next(err); }
+      req.flash('success', { msg: 'Password is successfully changed.' });
+      res.redirect('/account');
+    });
+  });
+};
+
+// Delete account
+exports.postDeleteAccount = (req, res, next) => {
+  User.remove({ _id: req.user.id }, (err) => {
+    if (err) { return next(err); }
     req.logout();
-    req.flash('info', { msg: 'Your account has been permanently deleted.' });
+    req.flash('info', { msg: 'Your account has been deleted.' });
     res.redirect('/');
   });
 };
 
-/**
- * GET /unlink/:provider
- */
-exports.unlink = function(req, res, next) {
-  User.findById(req.user.id, function(err, user) {
-    switch (req.params.provider) {
-      case 'facebook':
-        user.facebook = undefined;
-        break;
-      case 'google':
-        user.google = undefined;
-        break;
-      case 'twitter':
-        user.twitter = undefined;
-        break;
-      case 'vk':
-        user.vk = undefined;
-        break;
-      case 'github':
-          user.github = undefined;
-        break;      
-      default:
-        req.flash('error', { msg: 'Invalid OAuth Provider' });
-        return res.redirect('/account');
-    }
-    user.save(function(err) {
-      req.flash('success', { msg: 'Your account has been unlinked.' });
+
+// Unlink OAuth provider
+exports.getOauthUnlink = (req, res, next) => {
+  const provider = req.params.provider;
+  User.findById(req.user.id, (err, user) => {
+    if (err) { return next(err); }
+    user[provider] = undefined;
+    user.tokens = user.tokens.filter(token => token.kind !== provider);
+    user.save((err) => {
+      if (err) { return next(err); }
+      req.flash('info', { msg: `${provider} has been unlinked.` });
       res.redirect('/account');
     });
   });
 };
 
-/**
- * GET /forgot
- */
-exports.forgotGet = function(req, res) {
+// Reset password page
+exports.getReset = (req, res, next) => {
   if (req.isAuthenticated()) {
     return res.redirect('/');
   }
-  res.render('account/forgot', {
-    title: 'Forgot Password'
-  });
-};
-
-/**
- * POST /forgot
- */
-exports.forgotPost = function(req, res, next) {
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
-
-  var errors = req.validationErrors();
-
-  if (errors) {
-    req.flash('error', errors);
-    return res.redirect('/forgot');
-  }
-
-  async.waterfall([
-    function(done) {
-      crypto.randomBytes(16, function(err, buf) {
-        var token = buf.toString('hex');
-        done(err, token);
-      });
-    },
-    function(token, done) {
-      User.findOne({ email: req.body.email }, function(err, user) {
-        if (!user) {
-          req.flash('error', { msg: 'The email address ' + req.body.email + ' is not associated with any account.' });
-          return res.redirect('/forgot');
-        }
-        user.passwordResetToken = token;
-        user.passwordResetExpires = Date.now() + 3600000; // expire in 1 hour
-        user.save(function(err) {
-          done(err, token, user);
-        });
-      });
-    },
-    function(token, user, done) {
-      var transporter = nodemailer.createTransport({
-        service: 'Mailgun',
-        auth: {
-          user: process.env.MAILGUN_USERNAME,
-          pass: process.env.MAILGUN_PASSWORD
-        }
-      });
-      var mailOptions = {
-        to: user.email,
-        from: 'support@yourdomain.com',
-        subject: '✔ Reset your password on Mega Boilerplate',
-        text: 'You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n' +
-        'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-        'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-        'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-      };
-      transporter.sendMail(mailOptions, function(err) {
-        req.flash('info', { msg: 'An email has been sent to ' + user.email + ' with further instructions.' });
-        res.redirect('/forgot');
-      });
-    }
-  ]);
-};
-
-/**
- * GET /reset
- */
-exports.resetGet = function(req, res) {
-  if (req.isAuthenticated()) {
-    return res.redirect('/');
-  }
-  User.findOne({ passwordResetToken: req.params.token })
+  User
+    .findOne({ passwordResetToken: req.params.token })
     .where('passwordResetExpires').gt(Date.now())
-    .exec(function(err, user) {
+    .exec((err, user) => {
+      if (err) { return next(err); }
       if (!user) {
-        req.flash('error', { msg: 'Password reset token is invalid or has expired.' });
+        req.flash('errors', { msg: 'Password reset token is invalid.' });
         return res.redirect('/forgot');
       }
       res.render('account/reset', {
@@ -297,58 +203,133 @@ exports.resetGet = function(req, res) {
     });
 };
 
-/**
- * POST /reset
- */
-exports.resetPost = function(req, res, next) {
-  req.assert('password', 'Password must be at least 4 characters long').len(4);
-  req.assert('confirm', 'Passwords must match').equals(req.body.password);
+// Reset password action
+exports.postReset = (req, res, next) => {
+  req.assert('password', 'Password must be longer than 4 characters.').len(4);
+  req.assert('confirm', 'Passwords must match.').equals(req.body.password);
 
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
+    req.flash('errors', errors);
     return res.redirect('back');
   }
 
-  async.waterfall([
-    function(done) {
-      User.findOne({ passwordResetToken: req.params.token })
-        .where('passwordResetExpires').gt(Date.now())
-        .exec(function(err, user) {
-          if (!user) {
-            req.flash('error', { msg: 'Password reset token is invalid or has expired.' });
-            return res.redirect('back');
-          }
-          user.password = req.body.password;
-          user.passwordResetToken = undefined;
-          user.passwordResetExpires = undefined;
-          user.save(function(err) {
-            req.logIn(user, function(err) {
-              done(err, user);
-            });
-          });
-        });
-    },
-    function(user, done) {
-      var transporter = nodemailer.createTransport({
-        service: 'Mailgun',
-        auth: {
-          user: process.env.MAILGUN_USERNAME,
-          pass: process.env.MAILGUN_PASSWORD
+  const resetPassword = () =>
+    User
+      .findOne({ passwordResetToken: req.params.token })
+      .where('passwordResetExpires').gt(Date.now())
+      .then((user) => {
+        if (!user) {
+          req.flash('errors', { msg: 'Password reset token is invalid.' });
+          return res.redirect('back');
         }
+        user.password = req.body.password;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        return user.save().then(() => new Promise((resolve, reject) => {
+          req.logIn(user, (err) => {
+            if (err) { return reject(err); }
+            resolve(user);
+          });
+        }));
       });
-      var mailOptions = {
-        from: 'support@yourdomain.com',
-        to: user.email,
-        subject: 'Your Mega Boilerplate password has been changed',
-        text: 'Hello,\n\n' +
-        'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-      };
-      transporter.sendMail(mailOptions, function(err) {
-        req.flash('success', { msg: 'Your password has been changed successfully.' });
-        res.redirect('/account');
+
+  const sendResetPasswordEmail = (user) => {
+    if (!user) { return; }
+    const transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: process.env.SENDGRID_USER,
+        pass: process.env.SENDGRID_PASSWORD
+      }
+    });
+    const mailOptions = {
+      to: user.email,
+      from: 'admin@example.com',
+      subject: 'Your password has been changed',
+      text: `This is a confirmation that the password for your account ${user.email} has been changed.`
+    };
+    return transporter.sendMail(mailOptions)
+      .then(() => {
+        req.flash('success', { msg: 'Your password has been successfully changed.' });    
       });
-    }
-  ]);
+  };
+
+  resetPassword()
+    .then(sendResetPasswordEmail)
+    .then(() => { if (!res.finished) res.redirect('/'); })
+    .catch(err => next(err));
+};
+
+// Forgot password page
+exports.getForgot = (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect('/');
+  }
+  res.render('account/forgot', {
+    title: 'Forgot Password'
+  });
+};
+
+// Forgot pwd action: email user with a reset link
+exports.postForgot = (req, res, next) => {
+  req.assert('email', 'Please enter a valid email address.').isEmail();
+  req.sanitize('email').normalizeEmail({ remove_dots: false });
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect('/forgot');
+  }
+
+  const createRandomToken = crypto
+    .randomBytesAsync(16)
+    .then(buf => buf.toString('hex'));
+
+  const setRandomToken = token =>
+    User
+      .findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash('errors', { msg: 'User with that email address does not exist.' });
+        } else {
+          user.passwordResetToken = token;
+          user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+          user = user.save();
+        }
+        return user;
+      });
+
+  const sendForgotPasswordEmail = (user) => {
+    if (!user) { return; }
+    const token = user.passwordResetToken;
+    const transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: process.env.SENDGRID_USER,
+        pass: process.env.SENDGRID_PASSWORD
+      }
+    });
+    const mailOptions = {
+      to: user.email,
+      from: 'admin@example.com',
+      subject: 'Reset your password',
+      text: `You are receiving this email because a password reset request has been made.\n\n
+        Please click on the following link to complete the process:\n\n
+        http://${req.headers.host}/reset/${token}\n\n
+        If you did not request this, please ignore this email.\n`
+    };
+    return transporter.sendMail(mailOptions)
+      .then(() => {
+        req.flash('info', { msg: `An email has been sent to ${user.email} with instructions for password reset.` });
+      });
+  };
+
+  createRandomToken
+    .then(setRandomToken)
+    .then(sendForgotPasswordEmail)
+    .then(() => res.redirect('/forgot'))
+    .catch(next);
 };

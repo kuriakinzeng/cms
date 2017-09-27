@@ -1,47 +1,46 @@
-var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport({
-  service: 'Mailgun',
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'SendGrid',
   auth: {
-    user: process.env.MAILGUN_USERNAME,
-    pass: process.env.MAILGUN_PASSWORD
+    user: process.env.SENDGRID_USER,
+    pass: process.env.SENDGRID_PASSWORD
   }
 });
 
-/**
- * GET /contact
- */
-exports.contactGet = function(req, res) {
+// Contact page
+exports.getContact = (req, res) => {
   res.render('contact', {
     title: 'Contact'
   });
 };
 
-/**
- * POST /contact
- */
-exports.contactPost = function(req, res) {
-  req.assert('name', 'Name cannot be blank').notEmpty();
-  req.assert('email', 'Email is not valid').isEmail();
-  req.assert('email', 'Email cannot be blank').notEmpty();
-  req.assert('message', 'Message cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
+// Send email via nodemailer
+exports.postContact = (req, res) => {
+  req.assert('name', 'Name required').notEmpty();
+  req.assert('email', 'Valid email required').isEmail();
+  req.assert('message', 'Message required').notEmpty();
 
-  var errors = req.validationErrors();
+  const errors = req.validationErrors();
 
   if (errors) {
-    req.flash('error', errors);
+    req.flash('errors', errors);
     return res.redirect('/contact');
   }
 
-  var mailOptions = {
-    from: req.body.name + ' ' + '<'+ req.body.email + '>',
-    to: 'your@email.com',
-    subject: '✔ Contact Form | Mega Boilerplate',
+  const mailOptions = {
+    to: 'user@example.com',
+    from: `${req.body.name} <${req.body.email}>`,
+    subject: 'Contact Form',
     text: req.body.message
   };
 
-  transporter.sendMail(mailOptions, function(err) {
-    req.flash('success', { msg: 'Thank you! Your feedback has been submitted.' });
+  transporter.sendMail(mailOptions, (err) => {
+    if (err) {
+      req.flash('errors', { msg: err.message });
+      return res.redirect('/contact');
+    }
+    req.flash('success', { msg: 'Email has been sent successfully!' });
     res.redirect('/contact');
   });
 };

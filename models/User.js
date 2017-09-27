@@ -1,64 +1,56 @@
-var crypto = require('crypto');
-var bcrypt = require('bcrypt-nodejs');
-var mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs');
+const crypto = require('crypto');
+const mongoose = require('mongoose');
 
-var schemaOptions = {
-  timestamps: true,
-  toJSON: {
-    virtuals: true
-  }
-};
-
-var userSchema = new mongoose.Schema({
-  name: String,
-  email: { type: String, unique: true},
+const userSchema = new mongoose.Schema({
+  email: { type: String, unique: true },
   password: String,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  gender: String,
-  location: String,
-  website: String,
-  picture: String,
   facebook: String,
-  twitter: String,
-  google: String,
-  github: String,
-  vk: String
-}, schemaOptions);
+  tokens: Array,
+  profile: {
+    name: String,
+    gender: String,
+    location: String,
+    website: String,
+    picture: String
+  }
+}, { timestamps: true });
 
-userSchema.pre('save', function(next) {
-  var user = this;
+// Hash password before saving
+userSchema.pre('save', function save(next) {
+  const user = this;
   if (!user.isModified('password')) { return next(); }
-  bcrypt.genSalt(10, function(err, salt) {
-    bcrypt.hash(user.password, salt, null, function(err, hash) {
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) { return next(err); }
+    bcrypt.hash(user.password, salt, null, (err, hash) => {
+      if (err) { return next(err); }
       user.password = hash;
       next();
     });
   });
 });
 
-userSchema.methods.comparePassword = function(password, cb) {
-  bcrypt.compare(password, this.password, function(err, isMatch) {
+// Helper for validating password.
+userSchema.methods.comparePassword = function comparePassword(candidatePassword, cb) {
+  bcrypt.compare(candidatePassword, this.password, (err, isMatch) => {
     cb(err, isMatch);
   });
 };
 
-userSchema.virtual('gravatar').get(function() {
-  if (!this.get('email')) {
-    return 'https://gravatar.com/avatar/?s=200&d=retro';
+// Helper for getting user's gravatar
+userSchema.methods.gravatar = function gravatar(size) {
+  if (!size) {
+    size = 200;
   }
-  var md5 = crypto.createHash('md5').update(this.get('email')).digest('hex');
-  return 'https://gravatar.com/avatar/' + md5 + '?s=200&d=retro';
-});
-
-userSchema.options.toJSON = {
-  transform: function(doc, ret, options) {
-    delete ret.password;
-    delete ret.passwordResetToken;
-    delete ret.passwordResetExpires;
+  if (!this.email) {
+    return `https://gravatar.com/avatar/?s=${size}&d=retro`;
   }
+  const md5 = crypto.createHash('md5').update(this.email).digest('hex');
+  return `https://gravatar.com/avatar/${md5}?s=${size}&d=retro`;
 };
 
-var User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;

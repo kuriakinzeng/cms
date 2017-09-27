@@ -1,3 +1,5 @@
-$(function() {
-  // Your custom JavaScript goes here
+$(document).ready(function() {
+
+  // All jQuery code can come here
+
 });
