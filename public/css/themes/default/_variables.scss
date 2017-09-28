@@ -1,68 +1,60 @@
-@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,700");
-
-// Colors
+// Brand Colors
 // -------------------------
 
-$gray-lighter: #f5f5f5;
-$gray-light: #e0e0e0;
-$gray: #737373;
-$gray-dark: #404040;
-$gray-darker: #121212;
-
-$brand-primary: #2ac5ee;
-$brand-success: #0f9d58;
-$brand-warning: #f4b400;
-$brand-danger: #d80017;
+$brand-primary: #4d90fc;
+$brand-success: #60bf60;
+$brand-warning: #ff9800;
+$brand-danger: #de4b33;
 $brand-info: #5bc0dd;
 
 // Typography
 // -------------------------
 
-$font-size-base: 13px;
-$headings-font-family: 'Open Sans', sans-serif;
-$headings-font-weight: 700;
-$text-color: $gray-darker;
-$link-color: $brand-primary;
-$link-hover-color: $gray-darker;
-
-// Dropdowns
-// -------------------------
-
-$dropdown-link-color: $gray-darker;
+$headings-font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue", Arial, sans-serif;
 
 // Buttons
 // -------------------------
 
-$btn-default-bg: $gray-lighter;
-$btn-default-color: $gray-darker;
+$btn-primary-border: darken($brand-primary, 3.2%);
+$btn-success-border: darken($brand-success, 3.2%);
+$btn-warning-border: darken($brand-warning, 3.2%);
+$btn-danger-border: darken($brand-danger, 3.2%);
+$btn-info-border: darken($brand-info, 3.2%);
 
 // Forms
 // -------------------------
 
-$input-border-radius: 2px;
-$input-border-focus: #999;
-$input-border: #f0f0f0;
-$input-color: #444;
-$input-color-placeholder: #999;
-$input-height-base: 44px;
+$input-border-radius: 0;
+$input-border-focus: #2598f9;
 
 // Form states and alerts
 // -------------------------
 
-$state-success-bg: $brand-success;
-$state-info-bg: $brand-primary;
-$state-warning-bg: $brand-warning;
-$state-danger-bg: $brand-danger;
+$state-success-text: #569845;
+$state-success-bg: #dbf5d3;
+$state-success-border: #aed3a5;
+
+$state-info-text: #3a87ad;
+$state-info-bg: #d9edf7;
+$state-info-border: #98cce7;
+
+$state-warning-text: #bf9853;
+$state-warning-bg: #fdf8e2;
+$state-warning-border: #f2daab;
+
+$state-danger-text: #b94a48;
+$state-danger-bg: #f2dede;
+$state-danger-border: #e0b1b8;
+
 
 // Navbar
 // -------------------------
 
-$navbar-height: 50px;
-$navbar-default-bg: rgba(255,255,255,0.95);
-$navbar-default-link-color: $gray-darker;
-$navbar-default-link-active-color: $brand-primary;
-$navbar-default-link-active-bg: transparent;
-$navbar-default-link-hover-color: $brand-primary;
+$navbar-default-bg: rgba(255, 255, 255, 0.9);
+$navbar-default-link-color: #252525;
+$navbar-default-link-hover-color: #4da5f4;
+$navbar-default-link-active-color: #4da5f4;
 $navbar-default-link-hover-bg: transparent;
-$navbar-default-brand-color: $gray-darker;
-$navbar-default-brand-hover-color: $brand-primary;
+$navbar-default-link-active-bg: transparent;
+$navbar-default-color: #fafafa;
+$navbar-default-brand-hover-color: #4da5f4;

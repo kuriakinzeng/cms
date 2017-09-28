@@ -4,7 +4,10 @@ const nodemailer = require('nodemailer');
 const passport = require('passport');
 const User = require('../models/User');
 
-// GET - Show login page
+/**
+ * GET /login
+ * Login page.
+ */
 exports.getLogin = (req, res) => {
   if (req.user) {
     return res.redirect('/');
@@ -14,11 +17,14 @@ exports.getLogin = (req, res) => {
   });
 };
 
-// POST - Login action with email and password
+/**
+ * POST /login
+ * Sign in using email and password.
+ */
 exports.postLogin = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password cannot be blank').notEmpty();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
+  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -41,13 +47,19 @@ exports.postLogin = (req, res, next) => {
   })(req, res, next);
 };
 
-// Logout action
+/**
+ * GET /logout
+ * Log out.
+ */
 exports.logout = (req, res) => {
   req.logout();
   res.redirect('/');
 };
 
-// Sign up page
+/**
+ * GET /signup
+ * Signup page.
+ */
 exports.getSignup = (req, res) => {
   if (req.user) {
     return res.redirect('/');
@@ -57,12 +69,15 @@ exports.getSignup = (req, res) => {
   });
 };
 
-// Sign up action
+/**
+ * POST /signup
+ * Create a new local account.
+ */
 exports.postSignup = (req, res, next) => {
   req.assert('email', 'Email is not valid').isEmail();
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
+  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -94,17 +109,23 @@ exports.postSignup = (req, res, next) => {
   });
 };
 
-// Show profile
+/**
+ * GET /account
+ * Profile page.
+ */
 exports.getAccount = (req, res) => {
   res.render('account/profile', {
-    title: 'User Profile'
+    title: 'Account Management'
   });
 };
 
-// Update profile
+/**
+ * POST /account/profile
+ * Update profile information.
+ */
 exports.postUpdateProfile = (req, res, next) => {
   req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
+  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -134,7 +155,10 @@ exports.postUpdateProfile = (req, res, next) => {
   });
 };
 
-// Update password
+/**
+ * POST /account/password
+ * Update current password.
+ */
 exports.postUpdatePassword = (req, res, next) => {
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.assert('confirmPassword', 'Passwords do not match').equals(req.body.password);
@@ -151,13 +175,16 @@ exports.postUpdatePassword = (req, res, next) => {
     user.password = req.body.password;
     user.save((err) => {
       if (err) { return next(err); }
-      req.flash('success', { msg: 'Password is successfully changed.' });
+      req.flash('success', { msg: 'Password has been changed.' });
       res.redirect('/account');
     });
   });
 };
 
-// Delete account
+/**
+ * POST /account/delete
+ * Delete user account.
+ */
 exports.postDeleteAccount = (req, res, next) => {
   User.remove({ _id: req.user.id }, (err) => {
     if (err) { return next(err); }
@@ -167,8 +194,10 @@ exports.postDeleteAccount = (req, res, next) => {
   });
 };
 
-
-// Unlink OAuth provider
+/**
+ * GET /account/unlink/:provider
+ * Unlink OAuth provider.
+ */
 exports.getOauthUnlink = (req, res, next) => {
   const provider = req.params.provider;
   User.findById(req.user.id, (err, user) => {
@@ -177,13 +206,16 @@ exports.getOauthUnlink = (req, res, next) => {
     user.tokens = user.tokens.filter(token => token.kind !== provider);
     user.save((err) => {
       if (err) { return next(err); }
-      req.flash('info', { msg: `${provider} has been unlinked.` });
+      req.flash('info', { msg: `${provider} account has been unlinked.` });
       res.redirect('/account');
     });
   });
 };
 
-// Reset password page
+/**
+ * GET /reset/:token
+ * Reset Password page.
+ */
 exports.getReset = (req, res, next) => {
   if (req.isAuthenticated()) {
     return res.redirect('/');
@@ -194,7 +226,7 @@ exports.getReset = (req, res, next) => {
     .exec((err, user) => {
       if (err) { return next(err); }
       if (!user) {
-        req.flash('errors', { msg: 'Password reset token is invalid.' });
+        req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
         return res.redirect('/forgot');
       }
       res.render('account/reset', {
@@ -203,9 +235,12 @@ exports.getReset = (req, res, next) => {
     });
 };
 
-// Reset password action
+/**
+ * POST /reset/:token
+ * Process the reset password request.
+ */
 exports.postReset = (req, res, next) => {
-  req.assert('password', 'Password must be longer than 4 characters.').len(4);
+  req.assert('password', 'Password must be at least 4 characters long.').len(4);
   req.assert('confirm', 'Passwords must match.').equals(req.body.password);
 
   const errors = req.validationErrors();
@@ -221,7 +256,7 @@ exports.postReset = (req, res, next) => {
       .where('passwordResetExpires').gt(Date.now())
       .then((user) => {
         if (!user) {
-          req.flash('errors', { msg: 'Password reset token is invalid.' });
+          req.flash('errors', { msg: 'Password reset token is invalid or has expired.' });
           return res.redirect('back');
         }
         user.password = req.body.password;
@@ -246,13 +281,13 @@ exports.postReset = (req, res, next) => {
     });
     const mailOptions = {
       to: user.email,
-      from: 'admin@example.com',
-      subject: 'Your password has been changed',
-      text: `This is a confirmation that the password for your account ${user.email} has been changed.`
+      from: 'hackathon@starter.com',
+      subject: 'Your Hackathon Starter password has been changed',
+      text: `Hello,\n\nThis is a confirmation that the password for your account ${user.email} has just been changed.\n`
     };
     return transporter.sendMail(mailOptions)
       .then(() => {
-        req.flash('success', { msg: 'Your password has been successfully changed.' });    
+        req.flash('success', { msg: 'Success! Your password has been changed.' });
       });
   };
 
@@ -262,7 +297,10 @@ exports.postReset = (req, res, next) => {
     .catch(err => next(err));
 };
 
-// Forgot password page
+/**
+ * GET /forgot
+ * Forgot Password page.
+ */
 exports.getForgot = (req, res) => {
   if (req.isAuthenticated()) {
     return res.redirect('/');
@@ -272,10 +310,13 @@ exports.getForgot = (req, res) => {
   });
 };
 
-// Forgot pwd action: email user with a reset link
+/**
+ * POST /forgot
+ * Create a random token, then the send user an email with a reset link.
+ */
 exports.postForgot = (req, res, next) => {
   req.assert('email', 'Please enter a valid email address.').isEmail();
-  req.sanitize('email').normalizeEmail({ remove_dots: false });
+  req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
 
   const errors = req.validationErrors();
 
@@ -293,7 +334,7 @@ exports.postForgot = (req, res, next) => {
       .findOne({ email: req.body.email })
       .then((user) => {
         if (!user) {
-          req.flash('errors', { msg: 'User with that email address does not exist.' });
+          req.flash('errors', { msg: 'Account with that email address does not exist.' });
         } else {
           user.passwordResetToken = token;
           user.passwordResetExpires = Date.now() + 3600000; // 1 hour
@@ -314,16 +355,16 @@ exports.postForgot = (req, res, next) => {
     });
     const mailOptions = {
       to: user.email,
-      from: 'admin@example.com',
-      subject: 'Reset your password',
-      text: `You are receiving this email because a password reset request has been made.\n\n
-        Please click on the following link to complete the process:\n\n
+      from: 'hackathon@starter.com',
+      subject: 'Reset your password on Hackathon Starter',
+      text: `You are receiving this email because you (or someone else) have requested the reset of the password for your account.\n\n
+        Please click on the following link, or paste this into your browser to complete the process:\n\n
         http://${req.headers.host}/reset/${token}\n\n
-        If you did not request this, please ignore this email.\n`
+        If you did not request this, please ignore this email and your password will remain unchanged.\n`
     };
     return transporter.sendMail(mailOptions)
       .then(() => {
-        req.flash('info', { msg: `An email has been sent to ${user.email} with instructions for password reset.` });
+        req.flash('info', { msg: `An e-mail has been sent to ${user.email} with further instructions.` });
       });
   };
 
