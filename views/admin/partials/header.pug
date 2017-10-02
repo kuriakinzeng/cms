@@ -11,14 +11,14 @@
         | Cloudsolutely
     .collapse.navbar-collapse
       ul.nav.navbar-nav
-        li(class=(title === 'Home') ? 'active' : undefined)
-          a(href='/') Home
-        li(class=(title === 'API Examples') ? 'active' : undefined)
-          a(href='/api') API Examples
-        li(class=(title === 'Contact') ? 'active' : undefined)
-          a(href='/contact') Contact
-        li
-          a(href='/status') Status
+        li(class=(title === 'New Page - Admin') ? 'active' : undefined)
+          a(href='/admin/new-page') New Page
+        li(class=(title === 'Content - Admin') ? 'active' : undefined)
+          a(href='/admin/content') Content
+        li(class=(title === 'General - Admin') ? 'active' : undefined)
+          a(href='/admin/general') General
+        li(class=(title === 'Navigation - Admin') ? 'active' : undefined)
+          a(href='/admin/navigation') Navigation
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title === 'Login') ? 'active' : undefined)
