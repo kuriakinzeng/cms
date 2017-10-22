@@ -36,6 +36,7 @@ const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const adminController = require('./controllers/admin')
 const tagController = require('./controllers/tag');
+const siteController = require('./controllers/site');
 
 /**
  * API keys and Passport configuration.
@@ -212,6 +213,8 @@ app.get('/auth/linkedin', passport.authenticate('linkedin', { state: 'SOME STATE
 app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/login' }), (req, res) => {
   res.redirect(req.session.returnTo || '/');
 });
+
+app.post('/sites/:id/pages', siteController.postPage);
 
 /**
  * OAuth authorization routes. (API examples)
