@@ -215,6 +215,7 @@ app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRe
 });
 
 app.post('/sites/:id/pages', siteController.postPage);
+app.delete('/sites/:id/pages/:pageId', siteController.deletePage);
 
 /**
  * OAuth authorization routes. (API examples)

@@ -1,7 +1,7 @@
 const { Page } = require('../models/Site');
 
 /**
- * POST /pages
+ * POST /sites/id/pages
  * Create a new page
  */
 exports.postPage = (req, res, next) => {
@@ -29,4 +29,24 @@ exports.postPage = (req, res, next) => {
       res.json({ page });
     });
   }
+};
+
+/**
+ * DELETE /sites/id/pages/pageId
+ * Delete page
+ */
+exports.deletePage = (req, res, next) => {
+  const siteId = req.params.id;
+  const pageId = req.params.pageId;
+  Page.findOne({ _id: pageId, siteId }).then((page) => {
+    if (!page) {
+      return res.json({ message: 'Page not found' });
+    }
+
+    page.remove().then(() => {
+      res.json({ message: 'Success' });
+    });
+  }).catch((err) => {
+    next(err);
+  });
 };
