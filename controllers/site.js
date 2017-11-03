@@ -1,3 +1,4 @@
+const slug = require('slug');
 const { Page } = require('../models/Site');
 
 /**
@@ -49,4 +50,34 @@ exports.deletePage = (req, res, next) => {
   }).catch((err) => {
     next(err);
   });
+};
+
+/**
+ * PUT /sites/id/pages/pageId
+ * Update page
+ */
+exports.putPage = (req, res, next) => {
+  const siteId = req.params.id;
+  const pageId = req.params.pageId;
+
+  Page.findOne({ _id: pageId, siteId }).then((page) => {
+    if (!page) {
+      return res.json({ status: 'Page not found' });
+    }
+
+    page.siteId = req.body.siteId || page.siteId;
+    page.authorId = req.user._id || page.authorId;
+    page.title = req.body.title || page.title;
+    page.content = req.body.content || page.content;
+    page.isPublished = req.body.isPublished || page.isPublished;
+    page.slug = slug(req.body.slug, { lower: true, charmap: '' }) || page.slug;
+
+    page.save((err) => {
+      if (err) {
+        return next(err);
+      }
+
+      res.json({ status: 'success' });
+    });
+  }).catch(err => next(err));
 };
