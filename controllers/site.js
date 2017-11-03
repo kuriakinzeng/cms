@@ -16,7 +16,9 @@ exports.postPage = (req, res, next) => {
     res.json(errors);
   } else {
     const siteId = req.params.id;
-    const { title, content, author_id: authorId, is_published: isPublished } = req.body;
+    const authorId = req.user._id;
+    const { title, content, is_published: isPublished } = req.body;
+
     new Page({
       siteId,
       authorId,
@@ -39,6 +41,7 @@ exports.postPage = (req, res, next) => {
 exports.deletePage = (req, res, next) => {
   const siteId = req.params.id;
   const pageId = req.params.pageId;
+
   Page.findOne({ _id: pageId, siteId }).then((page) => {
     if (!page) {
       return res.json({ message: 'Page not found' });
