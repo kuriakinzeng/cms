@@ -214,8 +214,8 @@ app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRe
   res.redirect(req.session.returnTo || '/');
 });
 
-app.post('/sites/:id/pages', siteController.postPage);
-app.delete('/sites/:id/pages/:pageId', siteController.deletePage);
+app.post('/sites/:id/pages', passportConfig.isAuthenticated, siteController.postPage);
+app.delete('/sites/:id/pages/:pageId', passportConfig.isAuthenticated, siteController.deletePage);
 
 /**
  * OAuth authorization routes. (API examples)
