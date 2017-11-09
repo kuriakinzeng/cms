@@ -1,4 +1,46 @@
 extends ../layout
 
 block content
-  h1 New Page
+  .page-header
+    h3 New Page
+
+  form.form-horizontal(method='PUT')
+    input(type='hidden', name='_csrf', value=_csrf)
+    .form-group
+      label(class='col-sm-2 control-label', for='page-title') Page Title
+      .col-sm-8
+        input.form-control(type='text', name='page-title', id='page-title', autofocus=true)
+    .form-group
+      label(class='col-sm-2 control-label', for='page-slug') Page Slug
+      .col-sm-8
+        input.form-control(type='text', name='page-slug', id='page-slug', autofocus=true)
+    .form-group
+      label(class='col-sm-2 control-label', for='page-content') Page Content
+      .col-sm-8
+        textarea.form-control(rows='10', name='page-content', id='page-content')
+    .form-group
+      label(class='col-sm-2 control-label', for='tags') Tags
+      .col-sm-8
+        input.form-control(type='text', name='tags', id='tags', autofocus=true)
+    .form-group
+      label(class='col-sm-2 control-label', for='meta-title') Meta Title
+      .col-sm-8
+        input.form-control(type='text', name='meta-title', id='meta-title', autofocus=true)
+    .form-group
+      label(class='col-sm-2 control-label', for='meta-description') Meta Description
+      .col-sm-8
+        textarea.form-control(rows='2', name='meta-description', id='meta-description')
+    .form-group
+      .col-sm-offset-2.col-sm-8
+        .btn-group
+          button.btn.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown')
+            | Save Draft 
+            span.caret
+          ul.dropdown-menu(role='menu')
+            li
+              a(href='#') Publish Now
+            li
+              a(href='#') Save Draft
+            li
+              a(href='#') Delete Post
+

@@ -19,6 +19,10 @@
           a(href='/admin/general') General
         li(class=(title === 'Navigation - Admin') ? 'active' : undefined)
           a(href='/admin/navigation') Navigation
+        li
+          a(href='/', target='_blank')
+            span.fa.fa-external-link
+            | View Site
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title === 'Login') ? 'active' : undefined)

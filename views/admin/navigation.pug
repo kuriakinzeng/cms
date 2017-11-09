@@ -25,9 +25,16 @@ block content
           i.fa.fa-save
           | Save
 
+  style(type="text/css").
+    .nav-input {
+      display: flex;
+      align-items: center;
+    }
+    .nav-input * {
+      margin: 5px
+    }
 
   script(src="//rubaxa.github.io/Sortable/Sortable.js")
-  
   script.
     Sortable.create(navList, {
       handle: '.fa-bars',
