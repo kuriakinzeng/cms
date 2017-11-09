@@ -1,4 +1,36 @@
 extends ../layout
 
 block content
-  h1 Navigation
+  .page-header
+    h3 Navigation
+
+  form.form-horizontal(method='PUT')
+    input(type='hidden', name='_csrf', value=_csrf)
+    
+    #navList   
+      .nav-input(style="")
+        span.fa.fa-bars.pull-left.text-center(style='cursor: move;')
+        input.form-control(type='text', placeholder='Label', name='label', value='Home')
+        input.form-control(type='text', placeholder='URL', name='email', value='http://localhost:8080')
+        span.fa.fa-trash.pull-right.text-center(style='cursor: pointer;')
+      .nav-input(style="")
+        span.fa.fa-bars.pull-left.text-center(style='cursor: move;')
+        input.form-control(type='text', placeholder='Label', name='label', autofocus)
+        input.form-control(type='text', placeholder='URL', name='email')
+        span.fa.fa-plus.pull-right.text-center(style='cursor: pointer;')
+      
+    .form-group(style='margin-top:20px')
+      .col-sm-8
+        button.btn.btn-primary(type='submit')
+          i.fa.fa-save
+          | Save
+
+
+  script(src="//rubaxa.github.io/Sortable/Sortable.js")
+  
+  script.
+    Sortable.create(navList, {
+      handle: '.fa-bars',
+      animation: 150
+    });
+  
