@@ -1,5 +1,6 @@
 const Tag = require('../models/Tag');
 const Promise = require('bluebird');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 /**
  * POST /pages
@@ -68,7 +69,32 @@ exports.getAllTag = (req, res) => {
 
   return Tag.find(condition)
     .limit(10)
-    .then(tags => {
-      return res.json(tags);
-    });
+    .then(tags => res.json(tags));
+};
+
+exports.getById = (req, res) => {
+  const siteId = req.params.id;
+  const tagId = req.params.tagId;
+  console.log('tagId', tagId);
+
+  const condition = {
+    siteId,
+  };
+  // validate if tagId is object ID, then use _id as condition, otherwise use slug
+  // TODO: ObjectId.isValid is not accurate to validate, need other way
+  if (ObjectId.isValid(tagId)) {
+    condition._id = tagId;
+  } else {
+    condition.slug = tagId;
+  }
+
+  return Tag.findOne(condition)
+    .then((tag) => {
+      if (!tag) throw new Error('Tag not found');
+      return res.json(tag);
+    })
+    .catch(err => res.json({
+      success: false,
+      message: err.message
+    }));
 };

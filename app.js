@@ -235,6 +235,7 @@ app.get('/auth/pinterest/callback', passport.authorize('pinterest', { failureRed
 
 app.post('/sites/:id/tags', passportConfig.isAuthenticated, tagController.postTag);
 app.get('/sites/:id/tags', passportConfig.isAuthenticated, tagController.getAllTag);
+app.get('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.getById);
 app.delete('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.deleteTag);
 
 /**
