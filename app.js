@@ -93,7 +93,6 @@ app.use((req, res, next) => {
     next();
   } else {
     lusca.csrf()(req, res, next);
-    // next();
   }
 });
 app.use(lusca.xframe('SAMEORIGIN'));
