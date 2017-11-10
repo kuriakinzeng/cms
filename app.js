@@ -145,11 +145,11 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 /**
  * Admin routes.
  */ 
-app.get('/admin', passportConfig.isAuthenticated, adminController.index)
-app.get('/admin/new-page', passportConfig.isAuthenticated, adminController.getNewPage)
-app.get('/admin/content', passportConfig.isAuthenticated, adminController.getContent)
-app.get('/admin/general', passportConfig.isAuthenticated, adminController.getGeneral)
-app.get('/admin/navigation', passportConfig.isAuthenticated, adminController.getNavigation)
+app.get('/admin', passportConfig.isAuthenticated, adminController.index);
+app.get('/admin/new-page', passportConfig.isAuthenticated, adminController.getNewPage);
+app.get('/admin/content', passportConfig.isAuthenticated, adminController.getContent);
+app.get('/admin/general', passportConfig.isAuthenticated, adminController.getGeneral);
+app.get('/admin/navigation', passportConfig.isAuthenticated, adminController.getNavigation);
 
 /**
  * API examples routes.

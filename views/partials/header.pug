@@ -19,6 +19,9 @@
           a(href='/contact') Contact
         li
           a(href='/status') Status
+        if user
+          li
+            a(href='/admin') Admin
       ul.nav.navbar-nav.navbar-right
         if !user
           li(class=(title === 'Login') ? 'active' : undefined)
