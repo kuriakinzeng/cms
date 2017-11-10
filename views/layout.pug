@@ -9,7 +9,8 @@ html
     title #{title} - Cloudsolutely
     link(rel='shortcut icon', href='/favicon.png')
     link(rel='stylesheet', href='/css/main.css')
-
+    block styles
+    
   body
     if (title.indexOf('Admin') >= 0 )
       include admin/partials/header
