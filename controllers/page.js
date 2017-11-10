@@ -1,5 +1,5 @@
 const slug = require('slug');
-const { Page } = require('../models/Site');
+const Page = require('../models/Page');
 
 /**
  * POST /sites/id/pages
