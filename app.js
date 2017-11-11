@@ -35,6 +35,7 @@ const userController = require('./controllers/user');
 const apiController = require('./controllers/api');
 const contactController = require('./controllers/contact');
 const adminController = require('./controllers/admin')
+const tagController = require('./controllers/tag');
 
 /**
  * API keys and Passport configuration.
@@ -231,6 +232,11 @@ app.get('/auth/pinterest', passport.authorize('pinterest', { scope: 'read_public
 app.get('/auth/pinterest/callback', passport.authorize('pinterest', { failureRedirect: '/login' }), (req, res) => {
   res.redirect('/api/pinterest');
 });
+
+app.post('/sites/:id/tags', passportConfig.isAuthenticated, tagController.postTag);
+app.get('/sites/:id/tags', passportConfig.isAuthenticated, tagController.getAllTag);
+app.get('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.getById);
+app.delete('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.deleteTag);
 
 /**
  * Error Handler.
