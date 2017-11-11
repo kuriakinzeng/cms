@@ -21,7 +21,7 @@ exports.postSite = (req, res, next) => {
       title,
       url,
       owner,
-      members
+      members,
     }).save()
       .then((site) => {
         res.status(201).send({ site });
