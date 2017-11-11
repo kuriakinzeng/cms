@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const logger = require('morgan');
 const chalk = require('chalk');
 const errorHandler = require('errorhandler');
-const lusca = require('lusca');
+// const lusca = require('lusca');
 const dotenv = require('dotenv');
 const MongoStore = require('connect-mongo')(session);
 const flash = require('express-flash');
@@ -37,6 +37,7 @@ const contactController = require('./controllers/contact');
 const adminController = require('./controllers/admin')
 const tagController = require('./controllers/tag');
 const pageController = require('./controllers/page');
+const siteController = require('./controllers/site');
 
 /**
  * API keys and Passport configuration.
@@ -89,15 +90,15 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use((req, res, next) => {
-  if (req.path === '/api/upload') {
-    next();
-  } else {
-    lusca.csrf()(req, res, next);
-  }
-});
-app.use(lusca.xframe('SAMEORIGIN'));
-app.use(lusca.xssProtection(true));
+// app.use((req, res, next) => {
+//   if (req.path === '/api/upload') {
+//     next();
+//   } else {
+//     lusca.csrf()(req, res, next);
+//   }
+// });
+// app.use(lusca.xframe('SAMEORIGIN'));
+// app.use(lusca.xssProtection(true));
 app.use((req, res, next) => {
   res.locals.user = req.user;
   next();
@@ -105,21 +106,21 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   // After successful login, redirect back to the intended page
   if (!req.user &&
-      req.path !== '/login' &&
-      req.path !== '/signup' &&
-      !req.path.match(/^\/auth/) &&
-      !req.path.match(/\./)) {
+    req.path !== '/login' &&
+    req.path !== '/signup' &&
+    !req.path.match(/^\/auth/) &&
+    !req.path.match(/\./)) {
     req.session.returnTo = req.path;
   } else if (req.user &&
-      req.path === '/account') {
+    req.path === '/account') {
     req.session.returnTo = req.path;
   }
   next();
 });
 
-let maxAge = 0
-if(process.env.ENV == 'prod') {
-  maxAge = 31557600000
+let maxAge = 0;
+if (process.env.ENV === 'prod') {
+  maxAge = 31557600000;
 }
 app.use(express.static(path.join(__dirname, 'public'), { maxAge }));
 
@@ -185,6 +186,11 @@ app.post('/api/upload', upload.single('myFile'), apiController.postFileUpload);
 app.get('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.getPinterest);
 app.post('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.postPinterest);
 app.get('/api/google-maps', apiController.getGoogleMaps);
+
+app.post('/sites', passportConfig.isAuthenticated, siteController.postSite);
+app.get('/sites/:id', passportConfig.isAuthenticated, siteController.getSite);
+app.put('/sites/:id', passportConfig.isAuthenticated, siteController.putSite);
+app.delete('/sites/:id', passportConfig.isAuthenticated, siteController.deleteSite);
 
 /**
  * OAuth authentication routes. (Sign in)
