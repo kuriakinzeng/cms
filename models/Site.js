@@ -8,7 +8,7 @@ const navigationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const siteSchema = new mongoose.Schema({
-  ownerId: { type: mongoose.Schema.Types.ObjectId, index: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, index: true },
   url: { type: String, unique: true },
   title: String,
   description: String,
@@ -21,14 +21,7 @@ const siteSchema = new mongoose.Schema({
   isPrivate: Boolean,
   members: [mongoose.Schema.Types.ObjectId], // It might not be needed in near future
   navigations: [navigationSchema],
-  pages: [
-    {
-      pageId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Page'
-      },
-    },
-  ],
+  pages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Page' }],
 }, { timestamps: true });
 
 siteSchema.plugin(arrayUniquePlugin); // Haven't tested it yet
