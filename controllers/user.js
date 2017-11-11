@@ -10,7 +10,7 @@ const User = require('../models/User');
  */
 exports.getLogin = (req, res) => {
   if (req.user) {
-    return res.redirect('/');
+    return res.redirect('/admin');
   }
   res.render('account/login', {
     title: 'Login'
@@ -39,10 +39,11 @@ exports.postLogin = (req, res, next) => {
       req.flash('errors', info);
       return res.redirect('/login');
     }
+    console.log('hey')
     req.logIn(user, (err) => {
       if (err) { return next(err); }
       req.flash('success', { msg: 'Success! You are logged in.' });
-      res.redirect(req.session.returnTo || '/');
+      res.redirect(req.session.returnTo || '/admin');
     });
   })(req, res, next);
 };
