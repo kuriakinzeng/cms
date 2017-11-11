@@ -52,6 +52,25 @@ exports.getSite = (req, res, next) => {
 };
 
 /**
+ * GET /sites/:id
+ * Get site
+ */
+exports.getDefaultSite = (req, res, next) => {
+  Site.findOne({})
+    .populate('owner', 'email profile')
+    .populate('members', 'email profile')
+    // .populate('navigations', 'label url order')
+    // .populate('pages', 'slug permalink title content author')
+    .then((site) => {
+      if (!site) {
+        return res.json({ status: 'Site not found' });
+      }
+      res.send({ site });
+    })
+    .catch(err => next(err));
+};
+
+/**
  * PUT /sites/:id
  * Update site
  */

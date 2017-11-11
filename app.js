@@ -187,6 +187,7 @@ app.get('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAutho
 app.post('/api/pinterest', passportConfig.isAuthenticated, passportConfig.isAuthorized, apiController.postPinterest);
 app.get('/api/google-maps', apiController.getGoogleMaps);
 
+app.get('/sites/default', passportConfig.isAuthenticated, siteController.getDefaultSite);
 app.post('/sites', passportConfig.isAuthenticated, siteController.postSite);
 app.get('/sites/:id', passportConfig.isAuthenticated, siteController.getSite);
 app.put('/sites/:id', passportConfig.isAuthenticated, siteController.putSite);
