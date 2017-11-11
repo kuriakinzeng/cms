@@ -48,7 +48,7 @@ exports.deletePage = (req, res, next) => {
     }
 
     page.remove().then(() => {
-      res.json({ message: 'Success' });
+      res.json({ message: 'Page deleted' });
     });
   }).catch((err) => {
     next(err);
@@ -65,7 +65,7 @@ exports.putPage = (req, res, next) => {
 
   Page.findOne({ _id: pageId, siteId }).then((page) => {
     if (!page) {
-      return res.json({ status: 'Page not found' });
+      return res.json({ message: 'Page not found' });
     }
 
     page.siteId = req.body.siteId || page.siteId;
@@ -75,12 +75,6 @@ exports.putPage = (req, res, next) => {
     page.isPublished = req.body.isPublished || page.isPublished;
     page.slug = slug(req.body.slug, { lower: true, charmap: '' }) || page.slug;
 
-    page.save((err) => {
-      if (err) {
-        return next(err);
-      }
-
-      res.json({ status: 'success' });
-    });
+    page.save().then(page => res.json({ page }));
   }).catch(err => next(err));
 };
