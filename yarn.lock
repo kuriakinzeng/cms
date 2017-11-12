@@ -257,6 +257,10 @@ async@2.1.4:
   dependencies:
     lodash "^4.14.0"
 
+async@^1.5.0:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -2566,6 +2570,14 @@ mongodb@2.2.31, "mongodb@>= 1.2.0 <3.0.0":
     mongodb-core "2.1.15"
     readable-stream "2.2.7"
 
+mongoose-slug-generator@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/mongoose-slug-generator/-/mongoose-slug-generator-1.0.4.tgz#a5364f2d4203783472c235c302d35aa1b20d53eb"
+  dependencies:
+    async "^1.5.0"
+    shortid "^2.2.4"
+    speakingurl "^7.0.0"
+
 mongoose-unique-array@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/mongoose-unique-array/-/mongoose-unique-array-0.2.0.tgz#c26c896c794e2b7beaca8277d72cfc97c359c62e"
@@ -3758,6 +3770,10 @@ shebang-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-1.0.0.tgz#da42f49740c0b42db2ca9728571cb190c98efea3"
 
+shortid@^2.2.4:
+  version "2.2.8"
+  resolved "https://registry.yarnpkg.com/shortid/-/shortid-2.2.8.tgz#033b117d6a2e975804f6f0969dbe7d3d0b355131"
+
 should@0.6.x:
   version "0.6.3"
   resolved "https://registry.yarnpkg.com/should/-/should-0.6.3.tgz#d4b55335c8908f3a6c47970b687f750372acdc73"
@@ -3799,6 +3815,12 @@ sliced@0.0.5:
 sliced@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sliced/-/sliced-1.0.1.tgz#0b3a662b5d04c3177b1926bea82b03f837a2ef41"
+
+slug@^0.9.1:
+  version "0.9.1"
+  resolved "https://registry.yarnpkg.com/slug/-/slug-0.9.1.tgz#af08f608a7c11516b61778aa800dce84c518cfda"
+  dependencies:
+    unicode ">= 0.3.1"
 
 sntp@1.x.x:
   version "1.0.9"
@@ -3877,6 +3899,10 @@ spdx-expression-parse@~1.0.0:
 spdx-license-ids@^1.0.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-1.2.2.tgz#c9df7a3424594ade6bd11900d596696dc06bac57"
+
+speakingurl@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/speakingurl/-/speakingurl-7.0.0.tgz#0a392873af83bad594565ce3dcb4332d5187ab0b"
 
 split@0.3:
   version "0.3.3"
@@ -4259,6 +4285,10 @@ underscore@^1.7.0:
 underscore@~1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.6.0.tgz#8b38b10cacdef63337b8b24e4ff86d45aea529a8"
+
+"unicode@>= 0.3.1":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/unicode/-/unicode-10.0.0.tgz#e5d51c1db93b6c71a0b879e0b0c4af7e6fdf688e"
 
 unique-string@^1.0.0:
   version "1.0.0"
