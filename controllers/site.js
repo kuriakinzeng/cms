@@ -75,6 +75,26 @@ exports.getDefaultSite = (req, res, next) => {
  * Update site
  */
 exports.putSite = (req, res, next) => {
+  req.assert('title', 'Title cannot be blank').notEmpty();
+  // req.assert('url', 'Url cannot be blank').notEmpty();
+  if (req.body.facebookPageUrl) {
+    req.assert('facebookPageUrl', 'Enter a valid Facebook URL').optional().matches('https://facebook.com/*');
+  }
+  if (req.body.twitterProfileUrl) {
+    req.assert('twitterProfileUrl', 'Enter a valid Twitter URL').optional().matches('https://twitter.com/*');
+  }
+  if (req.body.email) {
+    req.assert('email', 'Please enter a valid email address.').optional().isEmail();
+    req.sanitize('email').normalizeEmail({ gmail_remove_dots: false });
+  }
+
+  const errors = req.validationErrors();
+
+  if (errors) {
+    req.flash('errors', errors);
+    return res.redirect('/admin/general');
+  }
+
   Site.findOne({ _id: req.params.id })
     .then((site) => {
       if (!site) {
@@ -83,12 +103,14 @@ exports.putSite = (req, res, next) => {
 
       site.url = req.body.url || site.url;
       site.title = req.body.title || site.title;
-      site.description = req.body.description || site.description;
+      site.description = req.body.description;
       site.logoImageUrl = req.body.logoImageUrl || site.logoImageUrl;
       site.coverImageUrl = req.body.coverImageUrl || site.coverImageUrl;
       site.postPerPage = req.body.postPerPage || site.postPerPage;
-      site.facebookPageUrl = req.body.facebookPageUrl || site.facebookPageUrl;
-      site.twitterProfileUrl = req.body.twitterProfileUrl || site.twitterProfileUrl;
+      site.facebookPageUrl = req.body.facebookPageUrl;
+      site.twitterProfileUrl = req.body.twitterProfileUrl;
+      site.email = req.body.email;
+      site.address = req.body.address;
       site.timeZone = req.body.timeZone || site.timeZone;
       if (site.isPrivate !== undefined) {
         site.isPrivate = req.body.isPrivate;
@@ -98,8 +120,9 @@ exports.putSite = (req, res, next) => {
       site.pages = req.body.pages || site.pages;
 
       site.save()
-        .then((site) => {
-          res.send({ site });
+        .then(() => {
+          req.flash('success', { msg: 'Site information has been updated.' });
+          res.redirect('/admin/general');
         });
     })
     .catch(err => next(err));

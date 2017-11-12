@@ -4,16 +4,16 @@ block content
   .page-header
     h3 General
 
-  form.form-horizontal(method='PUT')
+  form.form-horizontal(action='/sites/' + site._id + '?_method=PUT', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
     .form-group
-      label(class='col-sm-2 control-label', for='site-title') Site Title
+      label(class='col-sm-2 control-label', for='title') Site Title
       .col-sm-8
-        input.form-control(type='text', name='site-title', id='site-title', autofocus=true)
+        input.form-control(type='text', name='title', id='title' value=site.title, autofocus=true)
     .form-group
-      label(class='col-sm-2 control-label', for='site-description') Site Description
+      label(class='col-sm-2 control-label', for='description') Site Description
       .col-sm-8
-        input.form-control(type='text', name='site-description', id='site-description', autofocus=true)
+        input.form-control(type='text', name='description', id='description', value=site.description, autofocus=true)
     .form-group
       label(class='col-sm-2 control-label', for='site-logo') Site Logo
       .col-sm-8
@@ -27,21 +27,25 @@ block content
       .col-sm-8
         input.form-control(type='file', name='site-favicon', id='site-cover', autofocus=true)
     .form-group
-      label(class='col-sm-2 control-label', for='facebook-profile-url') Facebook Profile URL
+      label(class='col-sm-2 control-label', for='facebookPageUrl') Facebook Profile URL
       .col-sm-8
-        input.form-control(type='text', name='facebook-profile-url', id='facebook-profile-url', autofocus=true)
+        input.form-control(type='text', name='facebookPageUrl', id='facebookPageUrl', value=site.facebookPageUrl, autofocus=true)
+    .form-group
+      label(class='col-sm-2 control-label', for='twitterProfileUrl') Twitter Profile URL
+      .col-sm-8
+        input.form-control(type='text', name='twitterProfileUrl', id='twitterProfileUrl', value=site.twitterProfileUrl, autofocus=true)
     .form-group
       label(class='col-sm-2 control-label', for='email') Email
       .col-sm-8
-        input.form-control(type='email', name='email', id='email', autofocus=true)
+        input.form-control(type='email', name='email', id='email', value=site.email, autofocus=true)
     .form-group
-      label(class='col-sm-2 control-label', for='address') Adress
+      label(class='col-sm-2 control-label', for='address') Address
       .col-sm-8
-        input.form-control(type='text', name='address', id='address', autofocus=true)
+        input.form-control(type='text', name='address', id='address', value=site.address, autofocus=true)
     .form-group
-      label(class='col-sm-2 control-label', for='site-theme') Theme
+      label(class='col-sm-2 control-label', for='theme') Theme
       .col-sm-8
-        input.form-control(type='file', name='site-theme', id='site-theme', autofocus=true)
+        input.form-control(type='file', name='theme', id='theme', autofocus=true)
     .form-group
       .col-sm-offset-2.col-sm-8
         button.btn.btn-primary(type='submit')

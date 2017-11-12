@@ -19,6 +19,7 @@ const expressValidator = require('express-validator');
 const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
+const methodOverride = require('method-override');
 
 const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
@@ -123,6 +124,7 @@ if (process.env.ENV === 'prod') {
   maxAge = 31557600000;
 }
 app.use(express.static(path.join(__dirname, 'public'), { maxAge }));
+app.use(methodOverride('_method'));
 
 /**
  * Primary app routes.

@@ -1,3 +1,5 @@
+const Site = require('../models/Site');
+
 /**
  * GET /admin/
  * Admin page.
@@ -33,10 +35,18 @@ exports.getContent = (req, res) => {
  * GET /admin/general
  * General admin page.
  */
-exports.getGeneral = (req, res) => {
-  res.render('admin/general', {
-    title: 'General - Admin'
-  });
+exports.getGeneral = (req, res, next) => {
+  Site.findOne({})
+    .then((site) => {
+      if (!site) {
+        throw new Error('Site not found');
+      }
+      res.render('admin/general', {
+        title: 'General - Admin',
+        site,
+      });
+    })
+    .catch(err => next(err));
 };
 
 /**

@@ -11,6 +11,8 @@ const siteSchema = new mongoose.Schema({
   postPerPage: { type: Number, default: 0 },
   facebookPageUrl: { type: String, default: '' },
   twitterProfileUrl: { type: String, default: '' },
+  email: { type: String, default: '' },
+  address: { type: String, default: '' },
   timeZone: { type: String, default: '' },
   isPrivate: { type: Boolean, default: false },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // It might not be needed in near future
