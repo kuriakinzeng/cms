@@ -8,6 +8,8 @@ const pageSchema = new mongoose.Schema({
   content: String,
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   isPublished: Boolean,
+  metaTitle: String,
+  metaDescription: String,
 }, { timestamps: true });
 
 pageSchema.plugin(slug);
