@@ -1,30 +1,26 @@
 const mongoose = require('mongoose');
-const arrayUniquePlugin = require('mongoose-unique-array');
-
-const navigationSchema = new mongoose.Schema({
-  label: String,
-  url: String,
-  order: Number,
-}, { timestamps: true });
+// const arrayUniquePlugin = require('mongoose-unique-array');
 
 const siteSchema = new mongoose.Schema({
-  owner: { type: mongoose.Schema.Types.ObjectId, index: true },
+  owner: { type: mongoose.Schema.Types.ObjectId, index: true, ref: 'User' },
   url: { type: String, unique: true },
   title: String,
-  description: String,
-  logoImageUrl: String,
-  coverImageUrl: String,
-  postPerPage: Number,
-  facebookPageUrl: String,
-  twitterProfileUrl: String,
-  timeZone: String,
-  isPrivate: Boolean,
-  members: [mongoose.Schema.Types.ObjectId], // It might not be needed in near future
-  navigations: [navigationSchema],
-  pages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Page' }],
+  description: { type: String, default: '' },
+  logoImageUrl: { type: String, default: '' },
+  coverImageUrl: { type: String, default: '' },
+  postPerPage: { type: Number, default: 0 },
+  facebookPageUrl: { type: String, default: '' },
+  twitterProfileUrl: { type: String, default: '' },
+  email: { type: String, default: '' },
+  address: { type: String, default: '' },
+  timeZone: { type: String, default: '' },
+  isPrivate: { type: Boolean, default: false },
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // It might not be needed in near future
+  navigations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Navigation', default: [] }],
+  pages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Page', default: [] }],
 }, { timestamps: true });
 
-siteSchema.plugin(arrayUniquePlugin); // Haven't tested it yet
+// siteSchema.plugin(arrayUniquePlugin); // Haven't tested it yet
 
 const Site = mongoose.model('Site', siteSchema);
 
