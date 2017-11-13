@@ -15,7 +15,7 @@ exports.postPage = (req, res, next) => {
   if (errors) {
     res.json(errors);
   } else {
-    const siteId = req.params.id;
+    const site = req.params.id;
     const authorId = req.user._id;
     const {
       title,
@@ -26,7 +26,7 @@ exports.postPage = (req, res, next) => {
     } = req.body;
 
     new Page({
-      siteId,
+      site,
       authorId,
       title,
       content,
@@ -47,10 +47,10 @@ exports.postPage = (req, res, next) => {
  * Delete page
  */
 exports.deletePage = (req, res, next) => {
-  const siteId = req.params.id;
+  const site = req.params.id;
   const pageId = req.params.pageId;
 
-  Page.findOne({ _id: pageId, siteId }).then((page) => {
+  Page.findOne({ _id: pageId, site }).then((page) => {
     if (!page) {
       return res.json({ message: 'Page not found' });
     }
@@ -68,15 +68,15 @@ exports.deletePage = (req, res, next) => {
  * Update page
  */
 exports.putPage = (req, res, next) => {
-  const siteId = req.params.id;
+  const site = req.params.id;
   const pageId = req.params.pageId;
 
-  Page.findOne({ _id: pageId, siteId }).then((page) => {
+  Page.findOne({ _id: pageId, site }).then((page) => {
     if (!page) {
       return res.json({ message: 'Page not found' });
     }
 
-    page.siteId = req.body.siteId || page.siteId;
+    page.site = req.body.site || page.site;
     page.authorId = req.user._id || page.authorId;
     page.title = req.body.title || page.title;
     page.content = req.body.content || page.content;
