@@ -15,16 +15,24 @@ exports.postPage = (req, res, next) => {
   if (errors) {
     res.json(errors);
   } else {
-    const siteId = req.params.id;
-    const authorId = req.user._id;
-    const { title, content, is_published: isPublished } = req.body;
+    const site = req.params.id;
+    const author = req.user._id;
+    const {
+      title,
+      content,
+      is_published: isPublished,
+      meta_title: metaTitle,
+      meta_description: metaDescription,
+    } = req.body;
 
     new Page({
-      siteId,
-      authorId,
+      site,
+      author,
       title,
       content,
       isPublished,
+      metaTitle,
+      metaDescription,
     }).save((err, page) => {
       if (err) {
         return next(err);
@@ -39,10 +47,10 @@ exports.postPage = (req, res, next) => {
  * Delete page
  */
 exports.deletePage = (req, res, next) => {
-  const siteId = req.params.id;
+  const site = req.params.id;
   const pageId = req.params.pageId;
 
-  Page.findOne({ _id: pageId, siteId }).then((page) => {
+  Page.findOne({ _id: pageId, site }).then((page) => {
     if (!page) {
       return res.json({ message: 'Page not found' });
     }
@@ -60,20 +68,25 @@ exports.deletePage = (req, res, next) => {
  * Update page
  */
 exports.putPage = (req, res, next) => {
-  const siteId = req.params.id;
+  const site = req.params.id;
   const pageId = req.params.pageId;
 
-  Page.findOne({ _id: pageId, siteId }).then((page) => {
+  Page.findOne({ _id: pageId, site }).then((page) => {
     if (!page) {
       return res.json({ message: 'Page not found' });
     }
 
-    page.siteId = req.body.siteId || page.siteId;
-    page.authorId = req.user._id || page.authorId;
+    page.site = req.body.site || page.site;
+    // Enable it if you want the last user that modify the page to become the author
+    // page.authorId = req.user._id || page.authorId;
     page.title = req.body.title || page.title;
     page.content = req.body.content || page.content;
-    page.isPublished = req.body.isPublished || page.isPublished;
-    page.slug = slug(req.body.slug, { lower: true, charmap: '' }) || page.slug;
+    page.isPublished = req.body.is_published || page.isPublished;
+    if (req.body.slug) {
+      page.slug = slug(req.body.slug, { lower: true, charmap: '' });
+    }
+    page.metaTitle = req.body.meta_title || page.metaTitle;
+    page.metaDescription = req.body.meta_description || page.metaDescription;
 
     page.save().then(page => res.json({ page }));
   }).catch(err => next(err));
