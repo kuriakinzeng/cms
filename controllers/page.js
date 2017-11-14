@@ -16,7 +16,7 @@ exports.postPage = (req, res, next) => {
     res.json(errors);
   } else {
     const site = req.params.id;
-    const authorId = req.user._id;
+    const author = req.user._id;
     const {
       title,
       content,
@@ -27,7 +27,7 @@ exports.postPage = (req, res, next) => {
 
     new Page({
       site,
-      authorId,
+      author,
       title,
       content,
       isPublished,
