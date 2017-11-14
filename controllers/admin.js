@@ -15,10 +15,18 @@ exports.index = (req, res) => {
  * GET /admin/new-page
  * New page admin page.
  */
-exports.getNewPage = (req, res) => {
-  res.render('admin/new-page', {
-    title: 'New Page - Admin'
-  });
+exports.getNewPage = (req, res, next) => {
+  Site.findOne({})
+    .then((site) => {
+      if (!site) {
+        throw new Error('Site not found');
+      }
+      res.render('admin/new-page', {
+        title: 'New Page - Admin',
+        site
+      });
+    })
+    .catch(err => next(err));
 };
 
 /**
