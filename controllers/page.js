@@ -77,7 +77,8 @@ exports.putPage = (req, res, next) => {
     }
 
     page.site = req.body.site || page.site;
-    page.authorId = req.user._id || page.authorId;
+    // Enable it if you want the last user that modify the page to become the author
+    // page.authorId = req.user._id || page.authorId;
     page.title = req.body.title || page.title;
     page.content = req.body.content || page.content;
     page.isPublished = req.body.is_published || page.isPublished;
