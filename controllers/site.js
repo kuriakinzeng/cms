@@ -104,8 +104,15 @@ exports.putSite = (req, res, next) => {
       site.url = req.body.url || site.url;
       site.title = req.body.title || site.title;
       site.description = req.body.description;
-      site.logoImageUrl = req.body.logoImageUrl || site.logoImageUrl;
-      site.coverImageUrl = req.body.coverImageUrl || site.coverImageUrl;
+      if (req.files.logoImageUrl) {
+        site.logoImageUrl = `${req.headers.origin}/uploads/${req.files.logoImageUrl[0].filename}`;
+      }
+      if (req.files.coverImageUrl) {
+        site.coverImageUrl = `${req.headers.origin}/uploads/${req.files.coverImageUrl[0].filename}`;
+      }
+      if (req.files.faviconImageUrl) {
+        site.faviconImageUrl = `${req.headers.origin}/uploads/${req.files.faviconImageUrl[0].filename}`;
+      }
       site.postPerPage = req.body.postPerPage || site.postPerPage;
       site.facebookPageUrl = req.body.facebookPageUrl;
       site.twitterProfileUrl = req.body.twitterProfileUrl;

@@ -8,6 +8,7 @@ const siteSchema = new mongoose.Schema({
   description: { type: String, default: '' },
   logoImageUrl: { type: String, default: '' },
   coverImageUrl: { type: String, default: '' },
+  faviconImageUrl: { type: String, default: '' },
   postPerPage: { type: Number, default: 0 },
   facebookPageUrl: { type: String, default: '' },
   twitterProfileUrl: { type: String, default: '' },
