@@ -1,3 +1,4 @@
+const Page = require('../models/Page');
 const Site = require('../models/Site');
 
 /**
@@ -25,10 +26,15 @@ exports.getNewPage = (req, res) => {
  * GET /admin/content
  * Content admin page.
  */
-exports.getContent = (req, res) => {
-  res.render('admin/content', {
-    title: 'Content - Admin'
-  });
+exports.getContent = (req, res, next) => {
+  Page.find({})
+    .then((pages) => {
+      res.render('admin/content', {
+        title: 'Content - Admin',
+        pages
+      });
+    })
+    .catch(err => next(err));
 };
 
 /**
