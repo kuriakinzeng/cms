@@ -82,7 +82,9 @@ exports.putPage = (req, res, next) => {
     page.title = req.body.title || page.title;
     page.content = req.body.content || page.content;
     page.isPublished = req.body.is_published || page.isPublished;
-    page.slug = slug(req.body.slug, { lower: true, charmap: '' }) || page.slug;
+    if (req.body.slug) {
+      page.slug = slug(req.body.slug, { lower: true, charmap: '' });
+    }
     page.metaTitle = req.body.meta_title || page.metaTitle;
     page.metaDescription = req.body.meta_description || page.metaDescription;
 
