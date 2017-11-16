@@ -23,11 +23,19 @@ exports.postPage = (req, res, next) => {
       'meta-title': metaTitle,
       'meta-description': metaDescription,
     } = req.body;
+    let {
+      slug
+    } = req.body;
+
+    if (!slug) {
+      slug = slug(req.body.title, { lower: true, charmap: '' });
+    }
 
     new Page({
       site,
       author,
       title,
+      slug,
       content,
       isPublished,
       metaTitle,
