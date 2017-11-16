@@ -95,6 +95,27 @@ exports.putSite = (req, res, next) => {
     return res.redirect('/admin/general');
   }
 
+  if (req.files.logoImageUrl && req.files.logoImageUrl[0].mimetype) {
+    if (req.files.logoImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
+  if (req.files.coverImageUrl && req.files.coverImageUrl[0].mimetype) {
+    if (req.files.coverImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
+  if (req.files.faviconImageUrl && req.files.faviconImageUrl[0].mimetype) {
+    if (req.files.faviconImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
   Site.findOne({ _id: req.params.id })
     .then((site) => {
       if (!site) {
