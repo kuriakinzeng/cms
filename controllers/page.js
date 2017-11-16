@@ -1,4 +1,4 @@
-const slug = require('slug');
+const slugGenerator = require('slug');
 const Page = require('../models/Page');
 
 /**
@@ -27,8 +27,10 @@ exports.postPage = (req, res, next) => {
       slug
     } = req.body;
 
-    if (!slug) {
-      slug = slug(req.body.title, { lower: true, charmap: '' });
+    if (slug) {
+      slug = slugGenerator(req.body.slug, { lower: true, charmap: '' });
+    } else {
+      slug = slugGenerator(req.body.title, { lower: true, charmap: '' });
     }
 
     new Page({
@@ -95,7 +97,7 @@ exports.putPage = (req, res, next) => {
     page.content = req.body.content || page.content;
     page.isPublished = req.body.is_published || page.isPublished;
     if (req.body.slug) {
-      page.slug = slug(req.body.slug, { lower: true, charmap: '' });
+      page.slug = slugGenerator(req.body.slug, { lower: true, charmap: '' });
     }
     page.metaTitle = req.body.meta_title || page.metaTitle;
     page.metaDescription = req.body.meta_description || page.metaDescription;
