@@ -15,6 +15,11 @@ exports.postNavigation = (req, res, next) => {
     const site = req.params.id;
     const { navigations } = req.body;
 
+    const merged = [...new Set(navigations.map(a => a.order))];
+    if (merged.length < navigations.length) {
+      return res.json({ message: 'Cannot have navigation with same order' });
+    }
+
     const queries = [];
     const options = {
       // Return the document after updates are applied
