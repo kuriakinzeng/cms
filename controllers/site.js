@@ -95,6 +95,27 @@ exports.putSite = (req, res, next) => {
     return res.redirect('/admin/general');
   }
 
+  if (req.files.logoImageUrl && req.files.logoImageUrl[0].mimetype) {
+    if (req.files.logoImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
+  if (req.files.coverImageUrl && req.files.coverImageUrl[0].mimetype) {
+    if (req.files.coverImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
+  if (req.files.faviconImageUrl && req.files.faviconImageUrl[0].mimetype) {
+    if (req.files.faviconImageUrl[0].mimetype.indexOf('image') < 0) {
+      req.flash('errors', { msg: 'Only images are accepted' });
+      return res.redirect('/admin/general');
+    }
+  }
+
   Site.findOne({ _id: req.params.id })
     .then((site) => {
       if (!site) {
@@ -104,8 +125,15 @@ exports.putSite = (req, res, next) => {
       site.url = req.body.url || site.url;
       site.title = req.body.title || site.title;
       site.description = req.body.description;
-      site.logoImageUrl = req.body.logoImageUrl || site.logoImageUrl;
-      site.coverImageUrl = req.body.coverImageUrl || site.coverImageUrl;
+      if (req.files.logoImageUrl) {
+        site.logoImageUrl = `${req.headers.origin}/uploads/${req.files.logoImageUrl[0].filename}`;
+      }
+      if (req.files.coverImageUrl) {
+        site.coverImageUrl = `${req.headers.origin}/uploads/${req.files.coverImageUrl[0].filename}`;
+      }
+      if (req.files.faviconImageUrl) {
+        site.faviconImageUrl = `${req.headers.origin}/uploads/${req.files.faviconImageUrl[0].filename}`;
+      }
       site.postPerPage = req.body.postPerPage || site.postPerPage;
       site.facebookPageUrl = req.body.facebookPageUrl;
       site.twitterProfileUrl = req.body.twitterProfileUrl;

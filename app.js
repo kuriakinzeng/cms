@@ -20,8 +20,20 @@ const expressStatusMonitor = require('express-status-monitor');
 const sass = require('node-sass-middleware');
 const multer = require('multer');
 const methodOverride = require('method-override');
+const crypto = require('crypto');
 
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, path.join(__dirname, 'uploads'));
+  },
+  filename(req, file, cb) {
+    crypto.pseudoRandomBytes(16, (err, raw) => {
+      if (err) return cb(err);
+      cb(null, raw.toString('hex') + path.extname(file.originalname));
+    });
+  }
+});
+const upload = multer({ storage });
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -124,6 +136,7 @@ if (process.env.ENV === 'prod') {
   maxAge = 31557600000;
 }
 app.use(express.static(path.join(__dirname, 'public'), { maxAge }));
+app.use('/uploads', express.static(`${process.cwd()}/uploads`));
 app.use(methodOverride('_method'));
 
 /**
@@ -149,7 +162,7 @@ app.get('/account/unlink/:provider', passportConfig.isAuthenticated, userControl
 
 /**
  * Admin routes.
- */ 
+ */
 app.get('/admin', passportConfig.isAuthenticated, adminController.index);
 app.get('/admin/new-page', passportConfig.isAuthenticated, adminController.getNewPage);
 app.get('/admin/content', passportConfig.isAuthenticated, adminController.getContent);
@@ -192,7 +205,11 @@ app.get('/api/google-maps', apiController.getGoogleMaps);
 app.get('/sites/default', passportConfig.isAuthenticated, siteController.getDefaultSite);
 app.post('/sites', passportConfig.isAuthenticated, siteController.postSite);
 app.get('/sites/:id', passportConfig.isAuthenticated, siteController.getSite);
-app.put('/sites/:id', passportConfig.isAuthenticated, siteController.putSite);
+app.put('/sites/:id', passportConfig.isAuthenticated, upload.fields([
+  { name: 'logoImageUrl', maxCount: 1 },
+  { name: 'coverImageUrl', maxCount: 1 },
+  { name: 'faviconImageUrl', maxCount: 1 }
+]), siteController.putSite);
 app.delete('/sites/:id', passportConfig.isAuthenticated, siteController.deleteSite);
 
 /**

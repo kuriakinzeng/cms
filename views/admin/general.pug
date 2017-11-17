@@ -4,7 +4,7 @@ block content
   .page-header
     h3 General
 
-  form.form-horizontal(action='/sites/' + site._id + '?_method=PUT', method='POST')
+  form.form-horizontal(action='/sites/' + site._id + '?_method=PUT', method='POST', enctype="multipart/form-data")
     input(type='hidden', name='_csrf', value=_csrf)
     .form-group
       label(class='col-sm-2 control-label', for='title') Site Title
@@ -15,17 +15,23 @@ block content
       .col-sm-8
         input.form-control(type='text', name='description', id='description', value=site.description, autofocus=true)
     .form-group
-      label(class='col-sm-2 control-label', for='site-logo') Site Logo
+      label(class='col-sm-2 control-label', for='logoImageUrl') Site Logo
       .col-sm-8
-        input.form-control(type='file', name='site-logo', id='site-logo', autofocus=true)
+        input.form-control(type='file', name='logoImageUrl', id='logoImageUrl', accept='.jpg,.jpeg,.png', autofocus=true)
+        if site.logoImageUrl
+          img.logo(src=site.logoImageUrl )
     .form-group
-      label(class='col-sm-2 control-label', for='site-favicon') Site Favicon
+      label(class='col-sm-2 control-label', for='coverImageUrl') Site Cover
       .col-sm-8
-        input.form-control(type='file', name='site-favicon', id='site-favicon', autofocus=true)
+        input.form-control(type='file', name='coverImageUrl', id='coverImageUrl', accept='.jpg,.jpeg,.png', autofocus=true)
+        if site.coverImageUrl
+          img.logo(src=site.coverImageUrl )
     .form-group
-      label(class='col-sm-2 control-label', for='site-cover') Site Cover
+      label(class='col-sm-2 control-label', for='faviconImageUrl') Site Favicon
       .col-sm-8
-        input.form-control(type='file', name='site-favicon', id='site-cover', autofocus=true)
+        input.form-control(type='file', name='faviconImageUrl', id='faviconImageUrl',accept='.jpg,.jpeg,.png', autofocus=true)
+        if site.faviconImageUrl
+          img.logo(src=site.faviconImageUrl )
     .form-group
       label(class='col-sm-2 control-label', for='facebookPageUrl') Facebook Profile URL
       .col-sm-8
