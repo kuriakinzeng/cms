@@ -7,22 +7,13 @@ block content
     h3 Content
 
   .tab
-    button.tablinks(onclick="openTab(event, 't1')") London
-    button.tablinks(onclick="openTab(event, 't2')") Paris
-    button.tablinks(onclick="openTab(event, 't3')") Tokyo
-  #t1.tabcontent
-    a.fa.fa-edit.fa-lg.pull-right(href='#',style='margin-top:20px')
-    h3 London
-    p London is the capital city of England.
-  #t2.tabcontent
-    a.fa.fa-edit.fa-lg.pull-right(href='#',style='margin-top:20px')  
-    h3 Paris
-    p Paris is the capital of France.
-  #t3.tabcontent
-    a.fa.fa-edit.fa-lg.pull-right(href='#',style='margin-top:20px')  
-    h3 Tokyo
-    p Tokyo is the capital of Japan.
-
+    each page in pages
+      button.tablinks(onclick="openTab(event,'" + page._id + "')") #{page.title}
+  each page in pages
+    div.tabcontent(id=page._id, style=tabcontent)
+      a.fa.fa-edit.fa-lg.pull-right(href='#',style='margin-top:20px')
+      h3 #{page.title}
+      p #{page.content}
 
   style(type="text/css").
     div.tab {
@@ -72,10 +63,21 @@ block content
         tablinks[i].className = tablinks[i].className.replace(" active", "");
       }
       document.getElementById(id).style.display = "block";
-      if(event){
+      if (event){
         event.currentTarget.className += " active";
       }
     }
-    openTab(null, 't1')
-
-
+    function initialLoad() {
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 1; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 1; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      if (tablinks[0]) {
+        tablinks[0].className += " active";
+      }
+    }
+    initialLoad()
