@@ -33,6 +33,20 @@ exports.postPage = (req, res, next) => {
       slug = slugGenerator(req.body.title, { lower: true, charmap: '' });
     }
 
+    if (slug) {
+      Page.find({
+        site,
+        slug
+      })
+        .then((sites) => {
+          if (sites.length > 0) {
+            req.flash('errors', { msg: `Slug name of ${slug} is already used.` });
+            res.redirect('/admin/new-page');
+          }
+        })
+        .catch(err => next(err));
+    }
+
     new Page({
       site,
       author,
