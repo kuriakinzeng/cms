@@ -1,4 +1,4 @@
-const slug = require('slug');
+const slugGenerator = require('slug');
 const Page = require('../models/Page');
 
 /**
@@ -8,7 +8,6 @@ const Page = require('../models/Page');
 exports.postPage = (req, res, next) => {
   req.assert('title', 'Title cannot be blank').notEmpty();
   req.assert('content', 'Content cannot be blank').notEmpty();
-  req.assert('is_published', 'IsPublished cannot be blank').notEmpty();
 
   const errors = req.validationErrors();
 
@@ -17,18 +16,42 @@ exports.postPage = (req, res, next) => {
   } else {
     const site = req.params.id;
     const author = req.user._id;
+    const isPublished = JSON.parse(req.body['is-published']);
     const {
       title,
       content,
-      is_published: isPublished,
-      meta_title: metaTitle,
-      meta_description: metaDescription,
+      'meta-title': metaTitle,
+      'meta-description': metaDescription,
     } = req.body;
+    let {
+      slug
+    } = req.body;
+
+    if (slug) {
+      slug = slugGenerator(req.body.slug, { lower: true, charmap: '' });
+    } else {
+      slug = slugGenerator(req.body.title, { lower: true, charmap: '' });
+    }
+
+    if (slug) {
+      Page.find({
+        site,
+        slug
+      })
+        .then((sites) => {
+          if (sites.length > 0) {
+            req.flash('errors', { msg: `Slug name of ${slug} is already used.` });
+            res.redirect('/admin/new-page');
+          }
+        })
+        .catch(err => next(err));
+    }
 
     new Page({
       site,
       author,
       title,
+      slug,
       content,
       isPublished,
       metaTitle,
@@ -37,7 +60,12 @@ exports.postPage = (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.json({ page });
+      if (page.isPublished) {
+        req.flash('success', { msg: 'Page has been published.' });
+      } else {
+        req.flash('success', { msg: 'Page has been saved in draft.' });
+      }
+      res.redirect('/admin/new-page');
     });
   }
 };
@@ -83,7 +111,7 @@ exports.putPage = (req, res, next) => {
     page.content = req.body.content || page.content;
     page.isPublished = req.body.is_published || page.isPublished;
     if (req.body.slug) {
-      page.slug = slug(req.body.slug, { lower: true, charmap: '' });
+      page.slug = slugGenerator(req.body.slug, { lower: true, charmap: '' });
     }
     page.metaTitle = req.body.meta_title || page.metaTitle;
     page.metaDescription = req.body.meta_description || page.metaDescription;
