@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const navigationSchema = new mongoose.Schema({
+  site: { type: mongoose.Schema.Types.ObjectId, ref: 'Site' },
   label: String,
   url: String,
   order: Number,

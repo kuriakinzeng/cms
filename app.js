@@ -51,6 +51,7 @@ const adminController = require('./controllers/admin');
 const tagController = require('./controllers/tag');
 const pageController = require('./controllers/page');
 const siteController = require('./controllers/site');
+const navigationController = require('./controllers/navigation');
 
 /**
  * API keys and Passport configuration.
@@ -268,6 +269,10 @@ app.post('/sites/:id/tags', passportConfig.isAuthenticated, tagController.postTa
 app.get('/sites/:id/tags', passportConfig.isAuthenticated, tagController.getAllTag);
 app.get('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.getById);
 app.delete('/sites/:id/tags/:tagId', passportConfig.isAuthenticated, tagController.deleteTag);
+
+app.post('/sites/:id/navigations', passportConfig.isAuthenticated, navigationController.postNavigation);
+app.get('/sites/:id/navigations', passportConfig.isAuthenticated, navigationController.getAllNavigation);
+app.delete('/sites/:id/navigations/:navigationId', passportConfig.isAuthenticated, navigationController.deleteNavigation);
 
 /**
  * Error Handler.
