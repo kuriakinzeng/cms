@@ -4,24 +4,29 @@ block content
   .page-header
     h3 Navigation
 
-  form.form-horizontal(method='PUT')
+  form.form-horizontal#form(action='/sites/' + site._id + '/navigations', method='POST')
     input(type='hidden', name='_csrf', value=_csrf)
+    input(type='hidden', id='navigations', name='navigations')
     
-    #navList   
-      .nav-input(style="")
-        span.fa.fa-bars.pull-left.text-center(style='cursor: move;')
-        input.form-control(type='text', placeholder='Label', name='label', value='Home')
-        input.form-control(type='text', placeholder='URL', name='email', value='http://localhost:8080')
-        span.fa.fa-trash.pull-right.text-center(style='cursor: pointer;')
-      .nav-input(style="")
-        span.fa.fa-bars.pull-left.text-center(style='cursor: move;')
-        input.form-control(type='text', placeholder='Label', name='label', autofocus)
-        input.form-control(type='text', placeholder='URL', name='email')
-        span.fa.fa-plus.pull-right.text-center(style='cursor: pointer;')
+    #navList
+      each navigation in navigations  
+        .nav-input
+          span.fa.fa-bars.pull-left.text-center.cs-move.nav-drag
+          input.form-control(type='text', placeholder='Label', value=navigation.label, required='true')
+          input.form-control(type='text', placeholder='URL', value=navigation.url, required='true')
+          input.form-control(type='hidden', value=navigation.order)
+          span.fa.fa-trash.pull-right.text-center.cs-pointer(onclick='removeNav(this.parentNode)')
+    .nav-input#navTemplate.hidden
+      span.fa.fa-bars.pull-left.text-center.cs-move
+      input.form-control(type='text', placeholder='Label', autofocus)
+      input.form-control(type='text', placeholder='URL')
+      input(type='hidden')        
+      span.fa.fa-plus.pull-right.text-center.cs-pointer(onclick='addNav(this.parentNode)')
+      span.fa.fa-trash.pull-right.text-center.cs-pointer.hidden(onclick='removeNav(this.parentNode)')
       
     .form-group(style='margin-top:20px')
       .col-sm-8
-        button.btn.btn-primary(type='submit')
+        button.btn.btn-primary(type='button', onclick='saveNav()')
           i.fa.fa-save
           | Save
 
@@ -33,11 +38,82 @@ block content
     .nav-input * {
       margin: 5px
     }
+    .cs-move {
+      cursor: move;
+    }
+    .cs-pointer {
+      cursor: pointer;
+    }
+    .hidden {
+      display:none;
+    }
 
   script(src="//rubaxa.github.io/Sortable/Sortable.js")
   script.
     Sortable.create(navList, {
-      handle: '.fa-bars',
-      animation: 150
-    });
+      handle: '.nav-drag',
+      animation: 150,
+      //- onSort: function(event) {
+      //-   console.log(event)
+      //-   //- event.item.childNodes[3].value = event.newIndex;
+      //- },
+      onUpdate: function(event) {
+        //- console.log(event)
+        //- event.item.childNodes[3].value = event.newIndex;
+      },
+      onSort: function(event) {
+        console.log(event)
+        //- event.item.childNodes[3].value = event.newIndex;
+      },
+    }); 
+
+    const addNav = (nav) => {
+      const label = nav.childNodes[1].value;
+      const url = nav.childNodes[2].value;
+
+      if (!label || !url) {
+        return alert('value is required')
+      }
+
+      nav.childNodes[3].value = nav.parentNode.children.length - 1;
+      nav.childNodes[0].classList.add('nav-drag');
+      nav.childNodes[4].classList.add('hidden');
+      nav.childNodes[5].classList.remove('hidden');
+
+      displayNavInput();
+    }
+
+    const removeNav = (nav) => {
+      document.getElementById('navList').removeChild(nav)
+    }
+
+    const displayNavInput = () =>{
+      const template = document.getElementById('navTemplate');
+      const clone = template.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.classList.remove('hidden');
+      document.getElementById('navList').appendChild(clone)
+    }
+
+    const saveNav = () => {
+      const navCollections = document.getElementById('navList').childNodes;
+      const navArray = Array.from(navCollections);
+
+      const navigations = navArray.map(el => {
+          const inputs = Array.from(el.childNodes);
+          const [ label, url, order ] = inputs.slice(1,4).map(x => x.value);
+          
+          return {
+            label, 
+            url, 
+            order: parseInt(order)
+          }
+        })
+        .filter(el => el.url)
+      
+      document.getElementById('navigations').value = JSON.stringify(navigations);
+      document.getElementById('form').submit();
+    }
+
+    displayNavInput();
   

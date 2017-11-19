@@ -13,11 +13,15 @@ exports.postNavigation = (req, res, next) => {
     res.json(errors);
   } else {
     const site = req.params.id;
-    const { navigations } = req.body;
+    let { navigations } = req.body;
+    if (typeof navigations === 'string') {
+      navigations = JSON.parse(navigations);
+    }
 
     const merged = [...new Set(navigations.map(a => a.order))];
     if (merged.length < navigations.length) {
-      return res.json({ message: 'Cannot have navigation with same order' });
+      req.flash('errors', { msg: 'Cannot have navigation with same order' });
+      res.redirect('/admin/navigation');
     }
 
     const queries = [];
@@ -40,8 +44,9 @@ exports.postNavigation = (req, res, next) => {
     });
 
     Promise.all(queries)
-      .then((navigation) => {
-        res.status(201).send({ navigation });
+      .then(() => {
+        req.flash('success', { msg: 'Navigations has been updated.' });
+        res.redirect('/admin/navigation');
       })
       .catch(err => next(err));
   }
