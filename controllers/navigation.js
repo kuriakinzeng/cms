@@ -2,7 +2,7 @@ const Navigation = require('../models/Navigation');
 
 /**
  * POST /sites/:id/navigations
- * Create a new navigation
+ * Update/Create a new navigation
  */
 exports.postNavigation = (req, res, next) => {
   req.assert('navigations', 'No navigation to add').notEmpty();
@@ -73,13 +73,15 @@ exports.deleteNavigation = (req, res, next) => {
   Navigation.findOne({ _id: req.params.navigationId })
     .then((navigation) => {
       if (!navigation) {
-        return res.send({ status: 'Navigation not found' });
+        req.flash('errors', { msg: 'Navigation not found' });
+        res.redirect('/admin/navigation');
       }
 
       return navigation.remove();
     })
     .then(() => {
-      res.json({ message: 'Navigation deleted' });
+      req.flash('success', { msg: 'Navigation deleted.' });
+      res.redirect('/admin/navigation');
     })
     .catch(err => next(err));
 };
