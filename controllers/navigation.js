@@ -1,4 +1,5 @@
 const Navigation = require('../models/Navigation');
+const mongoose = require('mongoose');
 
 /**
  * POST /sites/:id/navigations
@@ -35,7 +36,8 @@ exports.postNavigation = (req, res, next) => {
 
     navigations.forEach((nav) => {
       const { label, url, order } = nav;
-      const query = { site, url };
+      const _id = nav.id || mongoose.Types.ObjectId();
+      const query = { site, _id };
 
       queries.push(
         Navigation.findOneAndUpdate(query, {

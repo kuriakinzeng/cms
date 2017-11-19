@@ -10,17 +10,15 @@ block content
     
     #navList
       each navigation in navigations  
-        .nav-input
+        .nav-input(data-order=navigation.order, data-id=navigation._id)
           span.fa.fa-bars.pull-left.text-center.cs-move.nav-drag
           input.form-control(type='text', placeholder='Label', value=navigation.label, required='true')
           input.form-control(type='text', placeholder='URL', value=navigation.url, required='true')
-          input(type='hidden', value=navigation.order)
           span.fa.fa-trash.pull-right.text-center.cs-pointer(onclick=`deleteNav("${navigation._id}")`)
     .nav-input#navTemplate.hidden
       span.fa.fa-bars.pull-left.text-center.cs-move
       input.form-control(type='text', placeholder='Label', autofocus)
       input.form-control(type='text', placeholder='URL')
-      input(type='hidden')        
       span.fa.fa-plus.pull-right.text-center.cs-pointer(onclick='addNav(this.parentNode)')
       span.fa.fa-trash.pull-right.text-center.cs-pointer.hidden(onclick='removeNav(this.parentNode)')
       
@@ -78,8 +76,8 @@ block content
       }
 
       nav.childNodes[0].classList.add('nav-drag');
-      nav.childNodes[4].classList.add('hidden');
-      nav.childNodes[5].classList.remove('hidden');
+      nav.childNodes[3].classList.add('hidden');
+      nav.childNodes[4].classList.remove('hidden');
 
       displayNavInput();
     }
@@ -94,7 +92,8 @@ block content
       const clone = template.cloneNode(true);
       clone.removeAttribute('id');
       clone.classList.remove('hidden');
-      clone.childNodes[3].value = navList.childNodes.length
+      clone.dataset.order = navList.childNodes.length;
+      clone.dataset.id = '';
       navList.appendChild(clone)
     }
 
@@ -104,16 +103,16 @@ block content
       const navigations = Array.from(navCollections)
         .map(el => {
           const inputs = Array.from(el.childNodes);
-          const [ label, url, order ] = inputs.slice(1,4).map(x => x.value);
+          const [ label, url ] = inputs.slice(1,3).map(x => x.value);
+          const { order, id } = el.dataset;
           
           return {
-            label, 
-            url, 
+            label, url, id,
             order: parseInt(order)
           }
         })
-        .filter(el => el.url)
-      
+        .filter(el => el.url && el.label)
+        
       document.getElementById('navigations').value = JSON.stringify(navigations);
       document.getElementById('form').submit();
     }
@@ -121,7 +120,7 @@ block content
     const deleteNav = (id) => {
       const deleteForm = document.createElement('form');
       deleteForm.action= `/sites/${siteId}/navigations/${id}/?_method=DELETE`;
-      deleteForm.method="POST";
+      deleteForm.method='POST';
 
       const csrf = document.getElementsByName('_csrf')[0];
       deleteForm.appendChild(csrf);
