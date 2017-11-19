@@ -51,17 +51,10 @@ block content
     Sortable.create(navList, {
       handle: '.nav-drag',
       animation: 150,
-      //- onSort: function(event) {
-      //-   console.log(event)
-      //-   //- event.item.childNodes[3].value = event.newIndex;
-      //- },
       onUpdate: function(event) {
-        //- console.log(event)
-        //- event.item.childNodes[3].value = event.newIndex;
-      },
-      onSort: function(event) {
-        console.log(event)
-        //- event.item.childNodes[3].value = event.newIndex;
+        event.target.childNodes.forEach((el,index) => {
+          el.dataset.order = index;
+        })
       },
     }); 
     
@@ -112,7 +105,7 @@ block content
           }
         })
         .filter(el => el.url && el.label)
-        
+
       document.getElementById('navigations').value = JSON.stringify(navigations);
       document.getElementById('form').submit();
     }
