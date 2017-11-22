@@ -1,8 +1,9 @@
 const Navigation = require('../models/Navigation');
+const mongoose = require('mongoose');
 
 /**
  * POST /sites/:id/navigations
- * Create a new navigation
+ * Update/Create a new navigation
  */
 exports.postNavigation = (req, res, next) => {
   req.assert('navigations', 'No navigation to add').notEmpty();
@@ -13,11 +14,15 @@ exports.postNavigation = (req, res, next) => {
     res.json(errors);
   } else {
     const site = req.params.id;
-    const { navigations } = req.body;
+    let { navigations } = req.body;
+    if (typeof navigations === 'string') {
+      navigations = JSON.parse(navigations);
+    }
 
     const merged = [...new Set(navigations.map(a => a.order))];
     if (merged.length < navigations.length) {
-      return res.json({ message: 'Cannot have navigation with same order' });
+      req.flash('errors', { msg: 'Cannot have navigation with same order' });
+      res.redirect('/admin/navigation');
     }
 
     const queries = [];
@@ -31,7 +36,8 @@ exports.postNavigation = (req, res, next) => {
 
     navigations.forEach((nav) => {
       const { label, url, order } = nav;
-      const query = { site, url };
+      const _id = nav.id || mongoose.Types.ObjectId();
+      const query = { site, _id };
 
       queries.push(
         Navigation.findOneAndUpdate(query, {
@@ -40,8 +46,9 @@ exports.postNavigation = (req, res, next) => {
     });
 
     Promise.all(queries)
-      .then((navigation) => {
-        res.status(201).send({ navigation });
+      .then(() => {
+        req.flash('success', { msg: 'Navigations has been updated.' });
+        res.redirect('/admin/navigation');
       })
       .catch(err => next(err));
   }
@@ -68,13 +75,15 @@ exports.deleteNavigation = (req, res, next) => {
   Navigation.findOne({ _id: req.params.navigationId })
     .then((navigation) => {
       if (!navigation) {
-        return res.send({ status: 'Navigation not found' });
+        req.flash('errors', { msg: 'Navigation not found' });
+        res.redirect('/admin/navigation');
       }
 
       return navigation.remove();
     })
     .then(() => {
-      res.json({ message: 'Navigation deleted' });
+      req.flash('success', { msg: 'Navigation deleted.' });
+      res.redirect('/admin/navigation');
     })
     .catch(err => next(err));
 };

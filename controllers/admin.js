@@ -1,5 +1,6 @@
 const Page = require('../models/Page');
 const Site = require('../models/Site');
+const Navigation = require('../models/Navigation');
 
 /**
  * GET /admin/
@@ -67,8 +68,25 @@ exports.getGeneral = (req, res, next) => {
  * GET /admin/navigation
  * Navigation admin page.
  */
-exports.getNavigation = (req, res) => {
-  res.render('admin/navigation', {
-    title: 'Navigation - Admin'
-  });
+exports.getNavigation = (req, res, next) => {
+  let currentSite;
+  Site.findOne({})
+    .then((site) => {
+      if (!site) {
+        throw new Error('Site not found');
+      }
+
+      currentSite = site;
+      return Navigation
+        .find({ site })
+        .sort({ order: 1 });
+    })
+    .then((navigations) => {
+      res.render('admin/navigation', {
+        title: 'Navigation - Admin',
+        site: currentSite,
+        navigations,
+      });
+    })
+    .catch(err => next(err));
 };
